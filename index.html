@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Stock Analysis System | Professional Trading Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="企業級股票分析系統 - 基於 FastAPI 的本地 CSV 架構，專為長期維護與擴展性設計" />
+
+    <style>
+        /*timeline*/
+                @charset "UTF-8";
+
+        article {
+            display: grid;
+        }
+        html {
+            min-height: 100%;
+        }
+
+        .timeline {
+            /* middle align along both axes */
+            place-self: center;
+            /* limit width */
+            max-width: 50em;
+        }
+
+        .timeline article {
+            /* commonly used length value ¯\_(ツ)_/¯ */
+            --size: .625em;
+            /* timeline bar and markers */
+            --highlight: lime;
+            /* default marker */
+            --marker:
+                radial-gradient(circle closest-side,
+                    var(--highlight) calc(100% - 1px), transparent) 0 0/ 100% var(--size);
+            /* spacing between the two columns (text content and image) */
+            grid-gap: 2em;
+            /* equally sized columns */
+            grid-template-columns: 1fr 1fr;
+            /* tiny correction, avoid subpixel rounding issues */
+            margin-top: -1px;
+            background: var(--marker), linear-gradient(var(--highlight) 0 0) 50%/2px;
+            background-repeat: no-repeat;
+            /* different marker for the first item */
+            /* for the odd items */
+            /* spacing in between items */
+            /* direct article children, text content box + img */
+        }
+
+        .timeline article:first-child {
+            --marker:
+                linear-gradient(var(--highlight) 0 0) 50% 0/ var(--size) calc(.5*var(--size));
+        }
+
+        .timeline article:nth-child(odd) img {
+            /* on the 1st row, 1st column */
+            grid-area: 1/1;
+            /* right-aligned */
+            justify-self: end;
+        }
+
+        .timeline article:not(:last-child) {
+            padding-bottom: 1em;
+        }
+
+        .timeline article>* {
+            border-radius: var(--size);
+        }
+
+        .timeline__content {
+            padding: 1em;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .timeline h1 {
+            margin: 0 0 var(--size);
+            color: #88d55e;
+            font: italic 1.375em/1 rosario, sans-serif;
+            text-transform: capitalize;
+        }
+
+        .timeline time {
+            font: 700 2.5em/1.25 roboto mono, monospace;
+        }
+
+        .timeline hr {
+            opacity: 0.3;
+        }
+
+        .timeline p {
+            margin: 0;
+            padding-top: 0.5em;
+            font: 1em proza libre, sans-serif;
+        }
+
+        .timeline img {
+            box-sizing: border-box;
+            border: solid 2px;
+            width: min(100%, 13em);
+            aspect-ratio: 1.3;
+            object-fit: cover;
+        }
+        /* 全局樣式 */
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0f172a;
+            --panel: #111827;
+            --panel-hover: #1a2332;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #38bdf8;
+            --accent-soft: rgba(59, 130, 246, 0.1);
+            --border: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --code-bg: #020617;
+            --gradient-start: rgba(59, 130, 246, 0.15);
+            --gradient-end: rgba(56, 189, 248, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+                "Microsoft JhengHei", "微軟正黑體";
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* 背景動態效果 */
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 10%, var(--gradient-start), transparent 50%),
+                radial-gradient(ellipse at 80% 90%, var(--gradient-end), transparent 50%),
+                var(--bg-primary);
+            z-index: -1;
+        }
+
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        /* 導航列 */
+        nav {
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(12px);
+            background: rgba(10, 14, 26, 0.8);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 16px 0;
+        }
+
+        nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--accent-primary);
+        }
+
+        /* 主標題區 */
+        header {
+            padding: 120px 24px 80px;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        header .subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.25rem);
+            color: var(--text-secondary);
+            max-width: 720px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        /* 徽章區 */
+        .badges {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .badge:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        /* CTA 按鈕 */
+        .cta {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .button {
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: 2px solid var(--accent-primary);
+            background: transparent;
+            color: var(--accent-primary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .button.primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .button.primary:hover {
+            background: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+        }
+
+        /* 統計數據區 */
+        .stats {
+            max-width: 1000px;
+            margin: 60px auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 24px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* 內容區塊 */
+        section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 24px;
+        }
+
+        section h2 {
+            font-size: clamp(1.8rem, 3vw, 2.2rem);
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+            position: relative;
+            display: inline-block;
+        }
+
+        section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), transparent);
+        }
+
+        section > p {
+            color: var(--text-secondary);
+            max-width: 800px;
+            font-size: 1.05rem;
+            margin-top: 24px;
+            line-height: 1.8;
+        }
+
+        /* 卡片網格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            background: var(--panel-hover);
+            border-color: var(--accent-primary);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            opacity: 0.8;
+        }
+
+        .card h3 {
+            margin: 0 0 12px;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        /* 程式碼區塊 */
+        .code-wrapper {
+            position: relative;
+            margin-top: 32px;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .code-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .code-copy {
+            padding: 4px 12px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--accent-primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .code-copy:hover {
+            background: var(--accent-soft);
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 24px;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        pre code {
+            color: var(--text-secondary);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        /* 特色功能區 */
+        .features {
+            background: linear-gradient(180deg, transparent, var(--panel) 50%, transparent);
+            padding: 80px 0;
+            margin: 80px 0;
+        }
+
+        .feature-list {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .feature-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .feature-item:nth-child(even) {
+            direction: rtl;
+        }
+
+        .feature-item:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .feature-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            color: var(--accent-primary);
+        }
+
+        .feature-content p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .feature-visual {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 60px 24px 40px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 24px;
+        }
+
+        /* 動畫 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            nav .nav-links {
+                gap: 16px;
+            }
+
+            header {
+                padding: 80px 24px 60px;
+            }
+
+            section {
+                padding: 60px 24px;
+            }
+
+            .feature-item {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .feature-item:nth-child(even) {
+                direction: ltr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 滾動條樣式 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-gradient"></div>
+    <div class="background-grid"></div>
+
+    <!-- 導航列 -->
+    <nav>
+        <div class="container">
+            <div class="logo">
+                <a href="#home">
+                    <span>📊</span>
+                    <span>Stock Analysis System</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="#features">功能特色</a>
+                <a href="#architecture">系統架構</a>
+                <a href="#tech">技術棧</a>
+                <a href="https://github.com" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主標題區 -->
+    <header id="home">
+        <h1>企業級股票分析平台</h1>
+        <p class="subtitle">
+            基於 FastAPI 的模組化離線優先股票分析後端系統<br />
+            專為長期維護性、透明度與可擴展性而設計
+        </p>
+
+        <div class="badges">
+            <span class="badge">🚀 FastAPI</span>
+            <span class="badge">📁 Local CSV</span>
+            <span class="badge">🇹🇼 台灣股市</span>
+            <span class="badge">📴 離線優先</span>
+            <span class="badge">🏗️ 清晰架構</span>
+            <span class="badge">🔒 資料自主</span>
+        </div>
+
+        <div class="cta">
+            <a class="button primary" href="#" title="GitHub Repository">
+                <span>查看原始碼</span>
+                <span>→</span>
+            </a>
+            <a class="button" href="#" title="Architecture Document">
+                <span>架構文件</span>
+            </a>
+            <a class="button" href="#" title="Technical Story">
+                <span>技術故事</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- 統計數據區 -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-value">100%</div>
+            <div class="stat-label">離線可用性</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">3層</div>
+            <div class="stat-label">清晰架構分層</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">外部依賴鎖定</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">∞</div>
+            <div class="stat-label">長期可維護性</div>
+        </div>
+    </div>
+
+    <!-- 專案動機 -->
+    <section>
+        <h2>專案存在的理由</h2>
+        <p>
+            許多股票系統的失敗不是因為演算法問題，而是因為數據增長、邏輯分散、
+            以及沒有人記得當初為什麼要這樣設計。
+        </p>
+        <p>
+            本專案將架構、資料所有權和長期清晰度視為首要關注點，
+            確保系統能夠隨時間演進而不是腐化。
+        </p>
+    </section>
+
+    <!-- 核心設計原則 -->
+    <section id="features">
+        <h2>核心設計原則</h2>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-icon">📁</div>
+                <h3>本地 CSV 為真實來源</h3>
+                <p>
+                    透明、可檢查、可移植的數據格式。
+                    沒有供應商鎖定，沒有隱藏狀態，
+                    所有數據都在你的掌控之中。
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🏗️</div>
+                <h3>嚴格的層次分離</h3>
+                <p>
+                    API、服務層和核心工具清晰分離，
+                    使系統易於演進，新功能不會破壞舊功能。
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🔤</div>
+                <h3>編碼感知設計</h3>
+                <p>
+                    台灣股市數據編碼問題被刻意處理，
+                    而非事後補救，確保中文資料完美呈現。
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🤖</div>
+                <h3>AI 作為消費者</h3>
+                <p>
+                    AI 端點消費已處理的數據，
+                    但永遠不控制核心業務邏輯。
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">⚡</div>
+                <h3>效能優化</h3>
+                <p>
+                    智慧快取機制、批次處理和非同步載入，
+                    確保即使處理大量數據也能快速回應。
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🔍</div>
+                <h3>可追溯性</h3>
+                <p>
+                    從 API 到原始數據的完整追蹤鏈，
+                    問題調試變得簡單直接。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 系統架構 -->
+    <section id="architecture">
+        <h2>專案結構</h2>
+        <p>清晰的目錄結構確保每個開發者都能快速理解系統架構</p>
+
+        <div class='timeline'>
+            <article>
+            <div class='timeline__content'>
+                <h1>Some heading</h1>
+                <time datetime='2005'>2005</time>
+                <hr />
+                <p>Jelly cotton candy apple pie toffee soufflé tiramisu pastry cupcake lollipop. Jelly beans wafer ice
+                    cream pastry topping topping gingerbread gummies. Brownie cotton candy sweet halvah oat cake.</p>
+            </div>
+            <img src='https://images.unsplash.com/photo-1753788132128-a6198b5d2f80?w=400'
+                alt='camera on a map on a desk' />
+        </article>
+        <article>
+            <div class='timeline__content'>
+                <h1>Some other heading</h1>
+                <time datetime='2006'>2006</time>
+                <hr />
+                <p>Jelly-o chocolate cake sweet fruitcake soufflé. Dessert halvah gummi bears lollipop powder brownie
+                    candy bear claw. Jelly-o marshmallow candy candy jujubes croissant fruitcake. Lollipop pudding
+                    brownie icing halvah dessert dessert.</p>
+            </div>
+            <img src='https://images.unsplash.com/photo-1755371033904-21dd8a9d002b?w=400' alt='mountain landscape' />
+        </article>
+        </div>
+    </section>
+
+    <!-- 技術棧 -->
+    <section id="tech">
+        <h2>技術棧與工具鏈</h2>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-icon">⚡</div>
+                <h3>FastAPI 後端</h3>
+                <p>
+                    現代、高效能的 Python Web 框架，
+                    自動生成 OpenAPI 文件，支援非同步處理。
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🐼</div>
+                <h3>Pandas 數據處理</h3>
+                <p>
+                    強大的數據分析庫，處理 CSV 檔案
+                    和複雜的時間序列運算。
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📊</div>
+                <h3>NumPy 科學計算</h3>
+                <p>
+                    高效能的數值運算，支援技術指標
+                    計算和統計分析。
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🔄</div>
+                <h3>Uvicorn ASGI Server</h3>
+                <p>
+                    閃電般快速的 ASGI 伺服器，
+                    支援高併發和 WebSocket。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特色功能 -->
+    <div class="features">
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-content">
+                    <h3>安全的功能擴展</h3>
+                    <p>
+                        清晰的架構分層讓你能夠輕鬆添加新功能，
+                        而不會影響現有的功能。每個模組都有明確的職責邊界，
+                        降低維護成本，提高開發效率。
+                    </p>
+                </div>
+                <div class="feature-visual">
+                    <span style="font-size: 4rem; opacity: 0.6;">🔧</span>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-content">
+                    <h3>清晰的除錯流程</h3>
+                    <p>
+                        從 API 回應到原始 CSV 數據的完整追蹤鏈。
+                        問題發生時，你能迅速定位是數據問題、業務邏輯問題，
+                        還是 API 層問題。
+                    </p>
+                </div>
+                <div class="feature-visual">
+                    <span style="font-size: 4rem; opacity: 0.6;">🔍</span>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-content">
+                    <h3>未來遷移彈性</h3>
+                    <p>
+                        CSV 可以在需要時輕鬆替換為 SQLite 或傳統資料庫。
+                        抽象層的設計讓你能夠逐步升級，
+                        而不需要重寫整個系統。
+                    </p>
+                </div>
+                <div class="feature-visual">
+                    <span style="font-size: 4rem; opacity: 0.6;">🚀</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 使用案例 -->
+    <section>
+        <h2>適用場景</h2>
+
+        <div class="grid">
+            <div class="card">
+                <h3>📈 個人投資組合追蹤</h3>
+                <p>管理你的股票投資組合，追蹤績效並生成詳細報告</p>
+            </div>
+
+            <div class="card">
+                <h3>🔬 量化策略回測</h3>
+                <p>使用歷史數據測試你的交易策略，優化參數</p>
+            </div>
+
+            <div class="card">
+                <h3>📊 市場數據分析</h3>
+                <p>深入分析市場趨勢、技術指標和統計模式</p>
+            </div>
+
+            <div class="card">
+                <h3>🤖 AI 模型訓練</h3>
+                <p>為機器學習模型準備高品質的訓練數據</p>
+            </div>
+
+            <div class="card">
+                <h3>📱 客製化前端整合</h3>
+                <p>為你的網頁或行動應用提供可靠的後端 API</p>
+            </div>
+
+            <div class="card">
+                <h3>🏢 企業級應用</h3>
+                <p>可擴展的架構支援企業級應用和團隊協作</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 開始使用 -->
+    <section style="text-align: center; padding: 100px 24px;">
+        <h2 style="margin-bottom: 24px;">準備開始了嗎?</h2>
+        <p style="margin: 0 auto 40px; max-width: 600px;">
+            立即開始使用這個專業的股票分析系統，
+            體驗清晰架構帶來的開發效率提升
+        </p>
+        <div class="cta">
+            <a class="button primary" href="https://github.com" target="_blank">
+                <span>查看 GitHub</span>
+                <span>→</span>
+            </a>
+            <a class="button" href="#">
+                <span>閱讀文件</span>
+            </a>
+            <a class="button" href="#">
+                <span>快速開始</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">首頁</a>
+                <a href="#">文件</a>
+                <a href="#">API 參考</a>
+                <a href="https://github.com" target="_blank">GitHub</a>
+                <a href="#">問題回報</a>
+                <a href="#">聯絡我們</a>
+            </div>
+            <div class="footer-copyright">
+                <p>Built with ❤️ by Thomas</p>
+                <p style="margin-top: 8px; opacity: 0.6;">
+                    FastAPI · Clean Architecture · Long-term Thinking · Taiwan Stock Market
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 複製程式碼功能
+        function copyCode() {
+            const code = document.querySelector('pre code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.querySelector('.code-copy');
+                btn.textContent = '已複製!';
+                setTimeout(() => {
+                    btn.textContent = '複製';
+                }, 2000);
+            });
+        }
+
+        // 平滑滾動
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
+
+        // 捲動時的動畫效果
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card, .stat-card, .feature-item').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+
+</body>
+
+</html>
