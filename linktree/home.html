@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Thomas | 未來商業 × AI策略</title>
+
+    <meta name="description" content="科技黑金風個人品牌入口，專注AI、投資決策與未來商業架構。">
+    <meta name="keywords" content="AI策略, 投資框架, 商業轉換, 科技黑金, 個人品牌">
+    <meta name="author" content="湯瑪斯">
+
+    <meta property="og:title" content="湯瑪斯 | × ">
+    <meta property="og:description" content="未來商業決策系統">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://thomas.artigianoapp.net/linktree/img/index.jpg">
+
+    <link rel="icon" href="/favicon.ico">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --black: #0d0d0d;
+            --gold: #d4af37;
+            --gold-glow: rgba(212, 175, 55, 0.4);
+            --card: #141414;
+            --text: #f5f5f5;
+            --sub: #999;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #465ea0, #f1eded);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: clamp(165px, 48vw, 230px);
+            height: auto;
+            aspect-ratio: 1 / 1;
+            border-radius: 14px;
+            object-fit: cover;
+            border: 8px solid #f3efe7;
+            border-bottom-width: 22px;
+            background: #f3efe7;
+            box-shadow:
+                0 18px 40px rgba(0, 0, 0, 0.5),
+                0 2px 0 rgba(255, 255, 255, 0.15) inset;
+            filter: saturate(0.95) contrast(1.05);
+            margin-bottom: 26px;
+            transform: rotate(-2deg);
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .avatar:hover {
+            transform: translateY(-4px) rotate(0.5deg) scale(1.02);
+            box-shadow:
+                0 26px 52px rgba(0, 0, 0, 0.6),
+                0 2px 0 rgba(255, 255, 255, 0.2) inset;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: #f2e8c9;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        h1::after {
+            content: "";
+            display: block;
+            width: 42%;
+            height: 1px;
+            margin: 10px auto 0;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            opacity: 0.9;
+        }
+
+        .bio {
+            font-size: 14px;
+            color: var(--sub);
+            margin: 10px 0 30px;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .link-btn {
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: var(--card);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            transition: 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent, var(--gold-glow), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+
+        .link-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .link-btn:hover {
+            box-shadow: 0 0 20px var(--gold-glow);
+            transform: translateY(-3px);
+        }
+
+        footer {
+            margin-top: 35px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .typing {
+            display: inline-block;
+            min-height: 1.4em;
+            line-height: 1.6;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 1px;
+            background: #d4af37;
+            margin-left: 4px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <img src="https://thomas.artigianoapp.net/linktree/img/index.jpg" class="avatar" alt="avatar">
+
+        <h1>Thomas Tsao</h1>
+        <p class="typing">
+            <span id="typed-text"></span>
+            <span class="cursor">|</span>
+        </p>
+
+        <div class="links">
+            <a href="https://thomas.artigianoapp.net/" class="link-btn">官方網站</a>
+            <a href="https://stock.artigianoapp.net/" class="link-btn">投資研究室</a>
+            <a href="https://github.com/ThomasTsao0704.html" class="link-btn">GitHub</a>
+            <a href="#" class="link-btn">Email 聯絡</a>
+        </div>
+
+        <footer>
+            © 2026 All Rights Reserved
+        </footer>
+    </div>
+    <script>
+
+        const texts = [
+            "研究趨勢，而不是追逐趨勢",
+            "質疑共識，而不是依附共識",
+            "在資訊洪流中保持清醒",
+            "打造長期可複利的人格資產"
+        ];
+
+        const speed = 70;
+        const delayBetween = 1500;
+
+        let textIndex = 0;
+        let charIndex = 0;
+        let currentText = "";
+        let isDeleting = false;
+
+        const typedText = document.getElementById("typed-text");
+
+        function typeEffect() {
+            currentText = texts[textIndex];
+
+            if (!isDeleting) {
+                typedText.textContent = currentText.slice(0, charIndex++);
+                if (charIndex > currentText.length) {
+                    setTimeout(() => isDeleting = true, delayBetween);
+                }
+            } else {
+                typedText.textContent = currentText.slice(0, charIndex--);
+                if (charIndex < 0) {
+                    isDeleting = false;
+                    textIndex = (textIndex + 1) % texts.length;
+                }
+            }
+
+            setTimeout(typeEffect, isDeleting ? speed / 2 : speed);
+        }
+
+        typeEffect();
+    </script>
+
+    </script>
+</body>
+
+</html>
