@@ -4,169 +4,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Thomas | 未來商業 × AI策略</title>
-
-    <meta name="description" content="科技黑金風個人品牌入口，專注AI、投資決策與未來商業架構。">
-    <meta name="keywords" content="AI策略, 投資框架, 商業轉換, 科技黑金, 個人品牌">
-    <meta name="author" content="湯瑪斯">
-
-    <meta property="og:title" content="湯瑪斯 | × ">
-    <meta property="og:description" content="未來商業決策系統">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://thomas.artigianoapp.net/linktree/img/index.jpg">
-
-    <link rel="icon" href="/favicon.ico">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-
+    <title>Insights | 你的品牌</title>
     <style>
-        :root {
-            --black: #0d0d0d;
-            --gold: #d4af37;
-            --gold-glow: rgba(212, 175, 55, 0.4);
-            --card: #141414;
-            --text: #f5f5f5;
-            --sub: #999;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Inter", sans-serif;
-        }
-
         body {
-            background: radial-gradient(circle at top, #465ea0, #f1eded);
-            color: var(--text);
-            min-height: 100vh;
+            background: #111;
+            color: #fff;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: "Noto Serif TC", serif;
         }
 
-        .container {
-            width: 100%;
-            max-width: 420px;
-            padding: 30px 20px;
+        .logo {
+            width: 180px;
+            height: auto;
+        }
+
+        .logo-wrap {
             text-align: center;
         }
 
-        .avatar {
-            width: clamp(165px, 48vw, 230px);
-            height: auto;
-            aspect-ratio: 1 / 1;
-            border-radius: 14px;
-            object-fit: cover;
-            border: 8px solid #f3efe7;
-            border-bottom-width: 22px;
-            background: #f3efe7;
-            box-shadow:
-                0 18px 40px rgba(0, 0, 0, 0.5),
-                0 2px 0 rgba(255, 255, 255, 0.15) inset;
-            filter: saturate(0.95) contrast(1.05);
-            margin-bottom: 26px;
-            transform: rotate(-2deg);
-            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        .logo-svg {
+            width: 140px;
+            margin-bottom: 20px;
         }
 
-        .avatar:hover {
-            transform: translateY(-4px) rotate(0.5deg) scale(1.02);
-            box-shadow:
-                0 26px 52px rgba(0, 0, 0, 0.6),
-                0 2px 0 rgba(255, 255, 255, 0.2) inset;
+        .logo {
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
         }
 
-        h1 {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: 1.2px;
-            color: #f2e8c9;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
-            position: relative;
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
         }
 
-        h1::after {
-            content: "";
-            display: block;
-            width: 42%;
-            height: 1px;
-            margin: 10px auto 0;
-            background: linear-gradient(90deg, transparent, #d4af37, transparent);
-            opacity: 0.9;
+        .frame {
+            fill: none;
+            stroke: #d6b15b;
+            stroke-width: 3;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
         }
 
-        .bio {
-            font-size: 14px;
-            color: var(--sub);
-            margin: 10px 0 30px;
+        .stroke {
+            fill: none;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+
+            stroke-dasharray: 800;
+            stroke-dashoffset: 800;
         }
 
-        .links {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+        .s1 {
+            animation: draw 1s ease forwards 0.2s;
         }
 
-        .link-btn {
-            text-decoration: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            background: var(--card);
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            transition: 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        .s2 {
+            animation: draw 1s ease forwards 0.6s;
         }
 
-        .link-btn::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(120deg, transparent, var(--gold-glow), transparent);
-            transform: translateX(-100%);
-            transition: 0.6s;
+        .s3 {
+            animation: draw 1s ease forwards 1s;
         }
 
-        .link-btn:hover::before {
-            transform: translateX(100%);
+        .s4 {
+            animation: draw 1s ease forwards 1.4s;
         }
 
-        .link-btn:hover {
-            box-shadow: 0 0 20px var(--gold-glow);
-            transform: translateY(-3px);
+        .s5 {
+            animation: draw 1s ease forwards 1.8s;
         }
 
-        footer {
-            margin-top: 35px;
+        .s6 {
+            animation: draw 1s ease forwards 2.2s;
+        }
+
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+
+        .zh {
+            font-size: 28px;
+            margin-top: 10px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 1.8s;
+        }
+
+        .en {
             font-size: 12px;
-            color: #666;
+            letter-spacing: 0.4em;
+            margin-top: 8px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 2.1s;
         }
 
-        .typing {
-            display: inline-block;
-            min-height: 1.4em;
-            line-height: 1.6;
-            white-space: nowrap;
-            overflow: hidden;
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
         }
 
-        .cursor {
-            display: inline-block;
-            width: 1px;
-            background: #d4af37;
-            margin-left: 4px;
-            animation: blink 1s infinite;
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
         }
 
-        @keyframes blink {
-            50% {
+        .fade-out {
+            animation: fadeOut 0.8s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
                 opacity: 0;
+                transform: scale(0.98);
             }
         }
     </style>
@@ -174,66 +132,54 @@
 
 <body>
 
-    <div class="container">
-        <img src="https://thomas.artigianoapp.net/linktree/img/index.jpg" class="avatar" alt="avatar">
+    <div class="logo-wrap">
+        <svg viewBox="0 0 258 355" fill="none">
+            <path class="stroke s1"
+                d="M99.2698 143.195C103.504 148.693 109.879 158.37 115.258 169.549C120.635 180.724 125.03 193.425 125.278 204.965C125.524 216.454 124.275 222.823 122.57 226.114C121.718 227.758 120.719 228.698 119.661 229.079C118.581 229.467 117.564 229.231 116.789 228.751L117.306 228.21C117.939 228.602 118.666 228.738 119.395 228.476C120.146 228.205 121.02 227.473 121.835 225.9C123.464 222.756 124.721 216.513 124.475 205.034C124.229 193.606 119.871 180.984 114.507 169.838C109.145 158.695 102.791 149.051 98.58 143.583L99.2698 143.195ZM141.173 122.743C138.034 126.893 132.665 133.51 126.753 139.884C120.851 146.247 114.373 152.406 109.018 155.605L108.585 155.081C113.822 151.952 120.23 145.874 126.131 139.511C132.023 133.159 137.376 126.562 140.502 122.429L141.173 122.743Z"
+                stroke="#C6A75E" stroke-width="1.8" />
+            <path class="stroke s2"
+                d="M168.826 149.592C163.696 156.23 155.248 162.022 146.81 166.562C138.364 171.106 129.884 174.417 124.647 176.077L124.401 175.314C129.593 173.667 138.027 170.375 146.425 165.857C154.831 161.335 163.16 155.607 168.185 149.104L168.826 149.592Z"
+                stroke="#C6A75E" stroke-width="1.8" />
+            <path class="stroke s3"
+                d="M146.982 70.4153C141.857 74.8752 130.452 81.2199 116.974 87.5638C103.482 93.9142 87.8671 100.285 74.2845 104.794L74.0417 104.282C87.5868 99.7863 103.171 93.4284 116.637 87.0898C130.117 80.7448 141.43 74.4403 146.47 70.0548L146.982 70.4153Z"
+                stroke="#C6A75E" stroke-width="2.2" />
+            <path class="stroke s4"
+                d="M56.2017 114.065C55.0627 131.254 53.8366 158.771 53.8601 185.452C53.8835 212.157 55.1599 237.949 59 251.734L58.1772 252C54.2953 238.065 53.0238 212.137 53.0003 185.453C52.9769 158.746 54.2043 131.206 55.3445 114L56.2017 114.065Z"
+                stroke="#C6A75E" stroke-width="2.2" />
+            <path class="stroke s5"
+                d="M224.739 217.933C225.303 217.873 225.907 217.928 226.362 218.228C226.598 218.384 226.788 218.603 226.898 218.888C227.006 219.168 227.025 219.484 226.97 219.822C226.862 220.486 226.457 221.301 225.713 222.289C224.218 224.277 221.225 227.139 215.88 231.162C210.527 235.191 202.791 240.403 191.786 247.083C169.676 260.504 141.451 263.787 115.552 262.727C89.6453 261.667 66.0018 256.257 53 252.229L53.2767 251.344C66.2159 255.353 89.7788 260.744 115.591 261.801C141.411 262.858 169.418 259.573 191.299 246.291C202.289 239.62 209.997 234.427 215.317 230.423C220.644 226.414 223.553 223.614 224.967 221.734C225.677 220.79 225.978 220.119 226.051 219.674C226.086 219.459 226.064 219.314 226.028 219.22C225.993 219.13 225.935 219.059 225.847 219.001C225.654 218.873 225.307 218.805 224.838 218.855C224.384 218.903 223.883 219.056 223.446 219.282L223.016 218.459C223.55 218.183 224.162 217.994 224.739 217.933Z"
+                stroke="#C6A75E" stroke-width="2.2" />
+            <path class="stroke s6"
+                d="M148.748 168C149.374 174.157 150.538 183.99 151.997 193.477C153.456 202.972 155.207 212.093 157 216.843L156.278 217C154.465 212.198 152.709 203.029 151.25 193.542C149.791 184.047 148.626 174.206 148 168.043L148.748 168Z"
+                stroke="#C6A75E" stroke-width="2.2" />
+        </svg>
 
-        <h1>Thomas Tsao</h1>
-        <p class="typing">
-            <span id="typed-text"></span>
-            <span class="cursor">|</span>
-        </p>
 
-        <div class="links">
-            <a href="https://thomas.artigianoapp.net/" class="link-btn">官方網站</a>
-            <a href="https://stock.artigianoapp.net/" class="link-btn">投資研究室</a>
-            <a href="https://github.com/ThomasTsao0704.html" class="link-btn">GitHub</a>
-            <a href="#" class="link-btn">Email 聯絡</a>
+
+        <div class="brand">
+            <div class="zh">匠誌</div>
+            <div class="en">ARTISAN JOURNAL</div>
         </div>
-
-        <footer>
-            © 2026 All Rights Reserved
-        </footer>
     </div>
     <script>
+        document.querySelectorAll('.stroke').forEach(path => {
+            const length = path.getTotalLength();
+            path.style.strokeDasharray = length;
+            path.style.strokeDashoffset = length;
+        });
 
-        const texts = [
-            "研究趨勢，而不是追逐趨勢",
-            "質疑共識，而不是依附共識",
-            "在資訊洪流中保持清醒",
-            "打造長期可複利的人格資產"
-        ];
+        const lastStroke = document.querySelector('.s6');
+        const wrapper = document.querySelector('.logo-wrap');
 
-        const speed = 70;
-        const delayBetween = 1500;
+        lastStroke.addEventListener('animationend', () => {
+            setTimeout(() => {
+                wrapper.classList.add('fade-out');
+            }, 300);
 
-        let textIndex = 0;
-        let charIndex = 0;
-        let currentText = "";
-        let isDeleting = false;
-
-        const typedText = document.getElementById("typed-text");
-
-        function typeEffect() {
-            currentText = texts[textIndex];
-
-            if (!isDeleting) {
-                typedText.textContent = currentText.slice(0, charIndex++);
-                if (charIndex > currentText.length) {
-                    setTimeout(() => isDeleting = true, delayBetween);
-                }
-            } else {
-                typedText.textContent = currentText.slice(0, charIndex--);
-                if (charIndex < 0) {
-                    isDeleting = false;
-                    textIndex = (textIndex + 1) % texts.length;
-                }
-            }
-
-            setTimeout(typeEffect, isDeleting ? speed / 2 : speed);
-        }
-
-        typeEffect();
-    </script>
+            setTimeout(() => {
+                window.location.href = "home.html";
+            }, 1100);
+        });
 
     </script>
 </body>
