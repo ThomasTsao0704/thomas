@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>個人名片</title>
+
+<!-- Open Graph — 由 JS 在載入後動態填入 -->
+<meta property="og:title"       content="">
+<meta property="og:description" content="">
+<meta property="og:type"        content="website">
+<meta property="og:image"       content="">
+<meta property="og:url"         content="">
+<meta name="description"        content="">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Shippori+Mincho:wght@400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -246,8 +255,26 @@ async function init() {
 
   if (!a) { showError(); return; }
 
-  document.title = `${a.name} — 個人名片`;
+  updateOGMeta(a);
   renderCard(a);
+}
+
+function updateOGMeta(a) {
+  const set = (selector, value) => {
+    const el = document.querySelector(selector);
+    if (el && value) el.setAttribute('content', value);
+  };
+
+  // tagline 以逗號合回一句作為描述，再附上 bio
+  const taglineText = a.tagline.split(/[，,]/).map(s => s.trim()).filter(Boolean).join('，');
+  const desc = `${taglineText} — ${a.bio}`;
+
+  document.title = `${a.name} | ${a.title}`;
+  set('meta[property="og:title"]',       `${a.name} | ${a.title}`);
+  set('meta[property="og:description"]', desc);
+  set('meta[property="og:image"]',       a.avatar || '');
+  set('meta[property="og:url"]',         location.href);
+  set('meta[name="description"]',        desc);
 }
 
 function renderCard(a) {
