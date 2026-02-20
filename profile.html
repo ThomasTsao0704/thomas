@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>職人名冊 — 個人頁面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Shippori+Mincho:wght@400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0d0b;
+    --surface: #161512;
+    --surface2: #1e1c18;
+    --border: #2a2720;
+    --gold: #c9a84c;
+    --gold-dim: #8a6e2f;
+    --text: #e8e0d0;
+    --text-dim: #7a7265;
+    --text-mid: #a89f8e;
+    --available: #4caf82;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif TC', serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Header */
+  header {
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+  }
+
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+
+  .back-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover { color: var(--gold); }
+
+  .logo-zh {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  /* Profile Hero */
+  .profile-hero {
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid var(--border);
+    padding: 64px 48px;
+    overflow: hidden;
+  }
+
+  .profile-hero::after {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .profile-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .profile-avatar-wrap {
+    position: relative;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    display: block;
+  }
+
+  .profile-avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 40px;
+    color: var(--gold-dim);
+  }
+
+  .profile-available {
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 28px; height: 28px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .available-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  .available-dot.on {
+    background: var(--available);
+    box-shadow: 0 0 10px rgba(76,175,130,0.6);
+  }
+
+  .available-dot.off { background: var(--text-dim); }
+
+  .profile-meta { padding-top: 4px; }
+
+  .profile-category {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .profile-category::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .profile-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+    animation: fadeIn 0.6s ease;
+  }
+
+  .profile-title {
+    font-size: 15px;
+    color: var(--text-mid);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    margin-bottom: 20px;
+  }
+
+  .profile-tagline {
+    font-size: 16px;
+    color: var(--text);
+    font-style: italic;
+    padding: 16px 20px;
+    border-left: 2px solid var(--gold);
+    background: rgba(201,168,76,0.04);
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  /* Content */
+  .profile-content {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 48px 80px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 48px;
+    margin-top: 48px;
+  }
+
+  /* Section */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .bio-text {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 2;
+    font-weight: 300;
+    margin-bottom: 40px;
+  }
+
+  /* Tags */
+  .tags-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--text-mid);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    transition: all 0.2s;
+  }
+
+  .tag:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+  /* Sidebar */
+  .sidebar { }
+
+  .info-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .info-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .info-value {
+    color: var(--text-mid);
+    font-size: 13px;
+  }
+
+  .status-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-badge.on {
+    color: var(--available);
+    border: 1px solid rgba(76,175,130,0.3);
+    background: rgba(76,175,130,0.06);
+  }
+
+  .status-badge.off {
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .status-badge.on .status-dot { background: var(--available); }
+  .status-badge.off .status-dot { background: var(--text-dim); }
+
+  /* Links */
+  .links-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .link-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-mid);
+    font-size: 13px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .link-item::after {
+    content: '↗';
+    position: absolute;
+    right: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+
+  .link-item:hover {
+    border-color: var(--gold-dim);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .link-item:hover::after {
+    color: var(--gold);
+    right: 12px;
+  }
+
+  .link-icon {
+    font-size: 14px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* Error */
+  .error-page {
+    max-width: 600px;
+    margin: 120px auto;
+    text-align: center;
+    padding: 0 48px;
+  }
+
+  .error-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 80px;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .error-text { color: var(--text-dim); font-size: 14px; }
+  .error-link {
+    display: inline-block;
+    margin-top: 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    text-decoration: none;
+    letter-spacing: 0.15em;
+    border-bottom: 1px solid var(--gold-dim);
+    padding-bottom: 2px;
+  }
+
+  /* Footer */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 28px 48px;
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .footer-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+
+  .footer-text a { color: var(--gold-dim); text-decoration: none; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 0.85em;
+    background: var(--gold);
+    margin-left: 1px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  .typing-cursor.done { animation: none; opacity: 0; }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  @media (max-width: 768px) {
+    header, .profile-hero, footer { padding-left: 20px; padding-right: 20px; }
+    .profile-inner { grid-template-columns: 1fr; gap: 24px; }
+    .profile-content { grid-template-columns: 1fr; padding: 0 20px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="back-link">← 返回名冊</a>
+    <a href="index.html" class="logo-zh">職人名冊</a>
+  </div>
+</header>
+
+<div id="app">
+  <!-- 動態載入 -->
+</div>
+
+<footer>
+  <p class="footer-text">© 2026 <a href="https://thomas.artigianoapp.net">Artisano</a> — 職人名冊</p>
+</footer>
+
+<script>
+const linkIcons = {
+  globe: '🌐', chart: '📊', github: '⌥', file: '📄', link: '🔗', email: '✉'
+};
+
+async function init() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+
+  if (!id) { showError(); return; }
+
+  const res = await fetch('artisans.json');
+  const data = await res.json();
+  const artisan = data.artisans.find(a => a.id === id);
+
+  if (!artisan) { showError(); return; }
+
+  // Update page title
+  document.title = `${artisan.name} — 職人名冊`;
+
+  renderProfile(artisan);
+}
+
+function renderProfile(a) {
+  const avatarHtml = a.avatar
+    ? `<img class="profile-avatar" src="${a.avatar}" alt="${a.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+       <div class="profile-avatar-placeholder" style="display:none">${a.name.charAt(0)}</div>`
+    : `<div class="profile-avatar-placeholder">${a.name.charAt(0)}</div>`;
+
+  document.getElementById('app').innerHTML = `
+    <section class="profile-hero">
+      <div class="profile-inner">
+        <div class="profile-avatar-wrap">
+          ${avatarHtml}
+          <div class="profile-available">
+            <div class="available-dot ${a.available ? 'on' : 'off'}"></div>
+          </div>
+        </div>
+        <div class="profile-meta">
+          <div class="profile-category">${a.category}</div>
+          <h1 class="profile-name">${a.name}</h1>
+          <p class="profile-title">${a.title}</p>
+          <blockquote class="profile-tagline">「<span id="typed-tagline"></span><span class="typing-cursor" id="tagline-cursor"></span>」</blockquote>
+        </div>
+      </div>
+    </section>
+
+    <div class="profile-content">
+      <div class="main-col">
+        <div class="section-label">關於</div>
+        <p class="bio-text">${a.bio}</p>
+
+        <div class="section-label">專業技能</div>
+        <div class="tags-wrap">
+          ${a.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="info-block">
+          <div class="section-label">資訊</div>
+          <div class="info-row">
+            <span class="info-label">地點</span>
+            <span class="info-value">📍 ${a.location}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">領域</span>
+            <span class="info-value">${a.category}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">狀態</span>
+            <span class="status-badge ${a.available ? 'on' : 'off'}">
+              <span class="status-dot"></span>
+              ${a.available ? '接案中' : '暫停接案'}
+            </span>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:8px">聯絡連結</div>
+        <div class="links-list">
+          ${a.links.map(l => `
+            <a href="${l.url}" class="link-item" target="_blank" rel="noopener">
+              <span class="link-icon">${linkIcons[l.icon] || '🔗'}</span>
+              <span>${l.label}</span>
+            </a>
+          `).join('')}
+        </div>
+      </aside>
+    </div>
+  `;
+
+  // 打字動畫：以逗號拆分 tagline，每句依序循環打字
+  (function typeTagline() {
+    const el = document.getElementById('typed-tagline');
+    const cursor = document.getElementById('tagline-cursor');
+    const phrases = a.tagline.split(/[，,]/).map(s => s.trim()).filter(Boolean);
+    const speed = 70;
+    const pause = 1800;
+    let idx = 0, char = 0, deleting = false;
+
+    function tick() {
+      const cur = phrases[idx];
+      if (!deleting) {
+        el.textContent = cur.slice(0, char++);
+        if (char > cur.length) {
+          // 只有一句時打完就停，游標消失
+          if (phrases.length === 1) { cursor.classList.add('done'); return; }
+          setTimeout(() => { deleting = true; tick(); }, pause);
+          return;
+        }
+      } else {
+        el.textContent = cur.slice(0, char--);
+        if (char < 0) {
+          char = 0;
+          deleting = false;
+          idx = (idx + 1) % phrases.length;
+        }
+      }
+      setTimeout(tick, deleting ? speed / 2 : speed);
+    }
+    tick();
+  })();
+}
+
+function showError() {
+  document.getElementById('app').innerHTML = `
+    <div class="error-page">
+      <div class="error-code">404</div>
+      <p class="error-text">找不到這位職人</p>
+      <a href="index.html" class="error-link">← 回到職人名冊</a>
+    </div>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>

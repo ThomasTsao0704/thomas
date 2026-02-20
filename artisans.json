@@ -1,0 +1,58 @@
+{
+  "platform": {
+    "name": "職人名冊",
+    "tagline": "找到真正懂行的人",
+    "description": "精選各領域頂尖職人，每一位都經過審核"
+  },
+  "artisans": [
+    {
+      "id": "thomas",
+      "name": "Thomas Tsao",
+      "avatar": "https://thomas.artigianoapp.net/linktree/img/index.jpg",
+      "title": "全端工程師 × AI策略顧問",
+      "tagline": "質疑共識而不是依附共識,在資訊洪流中保持清醒,打造長期可複利的人格資產",
+      "bio": "專注於台灣股市資料分析與 AI 應用開發，擅長將複雜數據轉化為實用商業洞察。多年全端開發經驗，協助企業以技術創造競爭優勢。",
+      "tags": ["AI策略", "全端開發", "股市分析", "Python", "資料視覺化"],
+      "category": "科技",
+      "location": "台灣",
+      "available": true,
+      "links": [
+        { "label": "官方網站", "url": "https://thomastsao0704.github.io/ThomasHub/", "icon": "globe" },
+        { "label": "投資研究室", "url": "https://stock.artigianoapp.net/", "icon": "chart" },
+        { "label": "GitHub", "url": "https://github.com/ThomasTsao0704", "icon": "github" },
+        { "label": "104 履歷", "url": "https://pda.104.com.tw/profile/share/3Elo0Lu6k3fzl5uvcmOLujzeDj9kGMcy", "icon": "file" }
+      ]
+    },
+    {
+      "id": "sample-designer",
+      "name": "林設計",
+      "avatar": "",
+      "title": "品牌設計師 × 視覺策略",
+      "tagline": "讓品牌說自己的語言",
+      "bio": "十年品牌設計經驗，服務過新創至上市企業。相信好設計是策略的延伸，不只是美感。",
+      "tags": ["品牌設計", "視覺識別", "UI/UX", "插畫"],
+      "category": "設計",
+      "location": "台北",
+      "available": true,
+      "links": [
+        { "label": "作品集", "url": "#", "icon": "globe" },
+        { "label": "Behance", "url": "#", "icon": "link" }
+      ]
+    },
+    {
+      "id": "sample-finance",
+      "name": "陳分析師",
+      "avatar": "",
+      "title": "財務顧問 × 投資策略",
+      "tagline": "數字背後的商業邏輯",
+      "bio": "擁有 CFA 資格，專注中小企業財務規劃與投資組合管理。協助創業者看清財務現況，做出更好的決策。",
+      "tags": ["財務規劃", "投資分析", "CFA", "估值"],
+      "category": "金融",
+      "location": "台中",
+      "available": false,
+      "links": [
+        { "label": "LinkedIn", "url": "#", "icon": "link" }
+      ]
+    }
+  ]
+}
