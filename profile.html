@@ -107,6 +107,13 @@
     align-items: start;
   }
 
+  .profile-avatar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
   .profile-avatar-wrap {
     position: relative;
   }
@@ -442,6 +449,198 @@
 
   @keyframes blink { 50% { opacity: 0; } }
 
+  /* ── 個人名片按鈕 ── */
+  .card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .card-btn::after { content: ' ↗'; }
+  .card-btn:hover { background: rgba(201,168,76,0.06); border-color: var(--gold); }
+
+  /* ── 個人名片 Overlay ── */
+  #card-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: radial-gradient(ellipse at 50% 0%, #1c2040 0%, #0a0908 65%);
+    overflow-y: auto;
+  }
+  #card-overlay.open {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overlay-close {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 201;
+  }
+  .overlay-close:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+  .overlay-inner {
+    width: 100%;
+    max-width: 400px;
+    padding: 64px 24px 56px;
+    text-align: center;
+    animation: fadeIn 0.35s ease;
+  }
+
+  .overlay-avatar {
+    width: clamp(130px, 40vw, 190px);
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 6px solid #f3efe7;
+    border-bottom-width: 20px;
+    background: #f3efe7;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65), 0 2px 0 rgba(255,255,255,0.12) inset;
+    filter: saturate(0.95) contrast(1.05);
+    margin: 0 auto 28px;
+    transform: rotate(-2deg);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    display: block;
+  }
+  .overlay-avatar:hover {
+    transform: translateY(-4px) rotate(0.5deg) scale(1.02);
+    box-shadow: 0 26px 52px rgba(0,0,0,0.75), 0 2px 0 rgba(255,255,255,0.18) inset;
+  }
+  .overlay-avatar-ph {
+    width: clamp(130px, 40vw, 190px);
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    background: var(--surface2);
+    border: 6px solid #f3efe7;
+    border-bottom-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 56px;
+    color: var(--gold-dim);
+    margin: 0 auto 28px;
+    transform: rotate(-2deg);
+  }
+
+  .overlay-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .overlay-name::after {
+    content: '';
+    display: block;
+    width: 42%;
+    height: 1px;
+    margin: 10px auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  .overlay-title {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .overlay-typing {
+    font-size: 13px;
+    color: var(--text-mid);
+    font-style: italic;
+    min-height: 2em;
+    margin: 12px 0 32px;
+  }
+
+  .overlay-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .overlay-link-btn {
+    text-decoration: none;
+    padding: 14px 20px;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .overlay-link-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(201,168,76,0.12), transparent);
+    transform: translateX(-100%);
+    transition: 0.6s;
+  }
+  .overlay-link-btn:hover::before { transform: translateX(100%); }
+  .overlay-link-btn:hover {
+    box-shadow: 0 0 20px rgba(201,168,76,0.15);
+    transform: translateY(-2px);
+    border-color: var(--gold);
+  }
+
+  .overlay-footer {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .overlay-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .overlay-status-dot.on  { background: var(--available); box-shadow: 0 0 6px rgba(76,175,130,0.5); }
+  .overlay-status-dot.off { background: var(--text-dim); }
+
   @media (max-width: 768px) {
     header, .profile-hero, footer { padding-left: 20px; padding-right: 20px; }
     .profile-inner { grid-template-columns: 1fr; gap: 24px; }
@@ -462,6 +661,8 @@
   <!-- 動態載入 -->
 </div>
 
+<div id="card-overlay"></div>
+
 <footer>
   <p class="footer-text">© 2026 <a href="https://thomas.artigianoapp.net">Artisano</a> — 職人名冊</p>
 </footer>
@@ -470,6 +671,8 @@
 const linkIcons = {
   globe: '🌐', chart: '📊', github: '⌥', file: '📄', link: '🔗', email: '✉'
 };
+
+let currentArtisan = null;
 
 async function init() {
   const params = new URLSearchParams(location.search);
@@ -490,6 +693,7 @@ async function init() {
 }
 
 function renderProfile(a) {
+  currentArtisan = a;
   const avatarHtml = a.avatar
     ? `<img class="profile-avatar" src="${a.avatar}" alt="${a.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
        <div class="profile-avatar-placeholder" style="display:none">${a.name.charAt(0)}</div>`
@@ -498,11 +702,14 @@ function renderProfile(a) {
   document.getElementById('app').innerHTML = `
     <section class="profile-hero">
       <div class="profile-inner">
-        <div class="profile-avatar-wrap">
-          ${avatarHtml}
-          <div class="profile-available">
-            <div class="available-dot ${a.available ? 'on' : 'off'}"></div>
+        <div class="profile-avatar-col">
+          <div class="profile-avatar-wrap">
+            ${avatarHtml}
+            <div class="profile-available">
+              <div class="available-dot ${a.available ? 'on' : 'off'}"></div>
+            </div>
           </div>
+          <button class="card-btn" onclick="openOverlay()">個人名片</button>
         </div>
         <div class="profile-meta">
           <div class="profile-category">${a.category}</div>
@@ -589,6 +796,88 @@ function renderProfile(a) {
     tick();
   })();
 }
+
+function openOverlay() {
+  const a = currentArtisan;
+  if (!a) return;
+
+  const avatarHtml = a.avatar
+    ? `<img class="overlay-avatar" src="${a.avatar}" alt="${a.name}"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+       <div class="overlay-avatar-ph" style="display:none">${a.name.charAt(0)}</div>`
+    : `<div class="overlay-avatar-ph">${a.name.charAt(0)}</div>`;
+
+  document.getElementById('card-overlay').innerHTML = `
+    <button class="overlay-close" onclick="closeOverlay()">×</button>
+    <div class="overlay-inner">
+      ${avatarHtml}
+      <div class="overlay-name">${a.name}</div>
+      <div class="overlay-title">${a.title}</div>
+      <p class="overlay-typing">
+        <span id="overlay-typed"></span><span class="typing-cursor" id="overlay-cursor"></span>
+      </p>
+      <div class="overlay-links">
+        ${a.links.map(l => `
+          <a href="${l.url}" class="overlay-link-btn" target="_blank" rel="noopener">
+            <span>${linkIcons[l.icon] || '🔗'}</span>
+            <span>${l.label}</span>
+          </a>
+        `).join('')}
+      </div>
+      <div class="overlay-footer">
+        <span class="overlay-status-dot ${a.available ? 'on' : 'off'}"></span>
+        <span>${a.available ? '接案中' : '暫停接案'}</span>
+        <span>·</span>
+        <span>📍 ${a.location}</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('card-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  startOverlayTyping(a.tagline);
+}
+
+function closeOverlay() {
+  document.getElementById('card-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function startOverlayTyping(tagline) {
+  const phrases = tagline.split(/[，,]/).map(s => s.trim()).filter(Boolean);
+  const speed = 70;
+  const pause = 1800;
+  let idx = 0, char = 0, deleting = false;
+
+  function tick() {
+    const el = document.getElementById('overlay-typed');
+    const cursor = document.getElementById('overlay-cursor');
+    if (!el) return; // overlay 已關閉
+
+    const cur = phrases[idx];
+    if (!deleting) {
+      el.textContent = cur.slice(0, char++);
+      if (char > cur.length) {
+        if (phrases.length === 1) { cursor.classList.add('done'); return; }
+        setTimeout(() => { deleting = true; tick(); }, pause);
+        return;
+      }
+    } else {
+      el.textContent = cur.slice(0, char--);
+      if (char < 0) {
+        char = 0;
+        deleting = false;
+        idx = (idx + 1) % phrases.length;
+      }
+    }
+    setTimeout(tick, deleting ? speed / 2 : speed);
+  }
+  tick();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeOverlay();
+});
 
 function showError() {
   document.getElementById('app').innerHTML = `
