@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>個人名片</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Shippori+Mincho:wght@400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0d0b;
+    --surface: #161512;
+    --border: #2a2720;
+    --gold: #c9a84c;
+    --gold-dim: #8a6e2f;
+    --text: #e8e0d0;
+    --text-dim: #7a7265;
+    --text-mid: #a89f8e;
+    --available: #4caf82;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: radial-gradient(ellipse at 50% 0%, #1c2040 0%, #0a0908 65%);
+    color: var(--text);
+    font-family: 'Noto Serif TC', serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .card-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 400px;
+    padding: 56px 28px 48px;
+    text-align: center;
+    animation: fadeIn 0.4s ease;
+  }
+
+  /* 頭像：拍立得風格 */
+  .avatar {
+    width: clamp(130px, 40vw, 190px);
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 6px solid #f3efe7;
+    border-bottom-width: 20px;
+    background: #f3efe7;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65), 0 2px 0 rgba(255,255,255,0.12) inset;
+    filter: saturate(0.95) contrast(1.05);
+    margin: 0 auto 28px;
+    transform: rotate(-2deg);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    display: block;
+  }
+  .avatar:hover {
+    transform: translateY(-4px) rotate(0.5deg) scale(1.02);
+    box-shadow: 0 26px 52px rgba(0,0,0,0.75), 0 2px 0 rgba(255,255,255,0.18) inset;
+  }
+
+  .avatar-ph {
+    width: clamp(130px, 40vw, 190px);
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 6px solid #f3efe7;
+    border-bottom-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 56px;
+    color: var(--gold-dim);
+    margin: 0 auto 28px;
+    transform: rotate(-2deg);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+  }
+
+  .name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .name::after {
+    content: '';
+    display: block;
+    width: 42%;
+    height: 1px;
+    margin: 10px auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  .title {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .typing-wrap {
+    font-size: 13px;
+    color: var(--text-mid);
+    font-style: italic;
+    min-height: 2em;
+    margin: 12px 0 32px;
+  }
+
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 0.85em;
+    background: var(--gold);
+    margin-left: 1px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+  .typing-cursor.done { animation: none; opacity: 0; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* 連結按鈕 */
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .link-btn {
+    text-decoration: none;
+    padding: 14px 20px;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .link-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(201,168,76,0.12), transparent);
+    transform: translateX(-100%);
+    transition: 0.6s;
+  }
+  .link-btn:hover::before { transform: translateX(100%); }
+  .link-btn:hover {
+    box-shadow: 0 0 20px rgba(201,168,76,0.15);
+    transform: translateY(-2px);
+    border-color: var(--gold);
+  }
+  .link-btn.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .link-btn.disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--gold-dim);
+  }
+
+  /* 底部狀態 */
+  .card-footer {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-dot.on  { background: var(--available); box-shadow: 0 0 6px rgba(76,175,130,0.5); }
+  .status-dot.off { background: var(--text-dim); }
+
+  /* 錯誤頁 */
+  .error {
+    text-align: center;
+    padding: 0 48px;
+  }
+  .error-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 80px;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .error-text { color: var(--text-dim); font-size: 14px; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const linkIcons = {
+  globe: '🌐', chart: '📊', github: '⌥', file: '📄', link: '🔗', email: '✉'
+};
+
+async function init() {
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) { showError(); return; }
+
+  const res = await fetch('artisans.json');
+  const data = await res.json();
+  const a = data.artisans.find(a => a.id === id);
+
+  if (!a) { showError(); return; }
+
+  document.title = `${a.name} — 個人名片`;
+  renderCard(a);
+}
+
+function renderCard(a) {
+  const avatarHtml = a.avatar
+    ? `<img class="avatar" src="${a.avatar}" alt="${a.name}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+       <div class="avatar-ph" style="display:none">${a.name.charAt(0)}</div>`
+    : `<div class="avatar-ph">${a.name.charAt(0)}</div>`;
+
+  const linksHtml = a.links.map(l => {
+    const isReal = l.url && l.url !== '#';
+    return `
+      <a href="javascript:void(0)"
+         class="link-btn${isReal ? '' : ' disabled'}"
+         onclick="${isReal ? `window.open('${l.url}','_blank','noopener,noreferrer');` : ''}">
+        <span>${linkIcons[l.icon] || '🔗'}</span>
+        <span>${l.label}</span>
+      </a>`;
+  }).join('');
+
+  document.getElementById('app').innerHTML = `
+    <div class="card-wrap">
+      ${avatarHtml}
+      <div class="name">${a.name}</div>
+      <div class="title">${a.title}</div>
+      <p class="typing-wrap">
+        <span id="typed"></span><span class="typing-cursor" id="cursor"></span>
+      </p>
+      <div class="links">${linksHtml}</div>
+      <div class="card-footer">
+        <span class="status-dot ${a.available ? 'on' : 'off'}"></span>
+        <span>${a.available ? '接案中' : '暫停接案'}</span>
+        <span>·</span>
+        <span>📍 ${a.location}</span>
+      </div>
+    </div>
+  `;
+
+  startTyping(a.tagline);
+}
+
+function startTyping(tagline) {
+  const phrases = tagline.split(/[，,]/).map(s => s.trim()).filter(Boolean);
+  const speed = 70, pause = 1800;
+  let idx = 0, char = 0, deleting = false;
+
+  function tick() {
+    const el = document.getElementById('typed');
+    const cursor = document.getElementById('cursor');
+    if (!el) return;
+    const cur = phrases[idx];
+    if (!deleting) {
+      el.textContent = cur.slice(0, char++);
+      if (char > cur.length) {
+        if (phrases.length === 1) { cursor.classList.add('done'); return; }
+        setTimeout(() => { deleting = true; tick(); }, pause);
+        return;
+      }
+    } else {
+      el.textContent = cur.slice(0, char--);
+      if (char < 0) {
+        char = 0; deleting = false;
+        idx = (idx + 1) % phrases.length;
+      }
+    }
+    setTimeout(tick, deleting ? speed / 2 : speed);
+  }
+  tick();
+}
+
+function showError() {
+  document.getElementById('app').innerHTML = `
+    <div class="error">
+      <div class="error-code">404</div>
+      <p class="error-text">找不到這位職人</p>
+    </div>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
