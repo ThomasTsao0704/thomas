@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>職人商店 — 精選服務與作品</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Shippori+Mincho:wght@400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0d0b;
+    --surface: #161512;
+    --surface2: #1e1c18;
+    --border: #2a2720;
+    --gold: #c9a84c;
+    --gold-dim: #8a6e2f;
+    --text: #e8e0d0;
+    --text-dim: #7a7265;
+    --text-mid: #a89f8e;
+    --available: #4caf82;
+    --unavailable: #555;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif TC', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Header */
+  header {
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+  }
+
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+
+  .back-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover { color: var(--gold); }
+
+  .logo-zh {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  .cart-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    border: 1px solid var(--gold-dim);
+    padding: 6px 14px;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .cart-btn:hover { background: rgba(201,168,76,0.08); border-color: var(--gold); }
+
+  .cart-count {
+    background: var(--gold);
+    color: var(--bg);
+    font-size: 10px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 80px 48px 64px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -80px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--gold-dim);
+  }
+
+  .hero h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: 14px;
+    color: var(--text-mid);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
+  /* Controls */
+  .controls {
+    position: relative;
+    z-index: 1;
+    padding: 28px 48px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .controls-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  #search {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 16px 12px 40px;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #search:focus { border-color: var(--gold-dim); }
+  #search::placeholder { color: var(--text-dim); }
+
+  .filter-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .filter-tab:hover { border-color: var(--gold-dim); color: var(--text); }
+  .filter-tab.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.06); }
+
+  /* Stats bar */
+  .stats-bar {
+    position: relative;
+    z-index: 1;
+    padding: 14px 48px;
+  }
+
+  .stats-bar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .count-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .count-text span { color: var(--gold); }
+
+  .sort-select {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 12px;
+    outline: none;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+
+  .sort-select:focus { border-color: var(--gold-dim); }
+
+  /* Grid */
+  .grid-section {
+    position: relative;
+    z-index: 1;
+    padding: 0 48px 80px;
+  }
+
+  .grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  /* Product Card */
+  .product-card {
+    background: var(--surface);
+    padding: 32px;
+    cursor: pointer;
+    transition: background 0.25s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInUp 0.5s ease both;
+  }
+
+  .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .product-card:hover { background: var(--surface2); }
+  .product-card:hover::before { opacity: 1; }
+
+  /* Featured badge */
+  .featured-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    padding: 3px 8px;
+    background: rgba(201,168,76,0.06);
+  }
+
+  /* Image area */
+  .product-image {
+    width: 100%;
+    height: 160px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-image-placeholder {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 32px;
+    color: var(--border);
+    letter-spacing: 0.1em;
+    user-select: none;
+  }
+
+  /* Category label */
+  .product-category {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .product-category::before {
+    content: '';
+    width: 14px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .product-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .product-desc {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.85;
+    font-weight: 300;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .product-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    transition: all 0.2s;
+  }
+
+  .product-card:hover .tag { border-color: #3a3730; color: var(--text-mid); }
+
+  /* Artisan row */
+  .product-artisan {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+    text-decoration: none;
+  }
+
+  .artisan-avatar-sm {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .artisan-avatar-placeholder-sm {
+    width: 28px;
+    height: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 12px;
+    color: var(--gold-dim);
+    flex-shrink: 0;
+  }
+
+  .artisan-name-sm {
+    font-size: 12px;
+    color: var(--text-mid);
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+
+  .product-card:hover .artisan-name-sm { color: var(--text); }
+
+  /* Price & CTA row */
+  .product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .product-price-wrap { line-height: 1; }
+
+  .price-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .price-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+  }
+
+  .price-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-left: 4px;
+  }
+
+  .product-delivery {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .inquire-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border: 1px solid var(--gold-dim);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .inquire-btn:hover { background: rgba(201,168,76,0.08); border-color: var(--gold); }
+
+  .inquire-btn.unavailable {
+    border-color: var(--border);
+    color: var(--text-dim);
+    cursor: not-allowed;
+  }
+
+  .inquire-btn.unavailable:hover { background: transparent; border-color: var(--border); }
+
+  /* Empty */
+  .empty {
+    grid-column: 1 / -1;
+    padding: 80px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  /* Cart Panel */
+  .cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .cart-overlay.open { opacity: 1; pointer-events: all; }
+
+  .cart-panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: 380px;
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 101;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s ease;
+  }
+
+  .cart-panel.open { transform: translateX(0); }
+
+  .cart-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cart-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 18px;
+    color: var(--text);
+    letter-spacing: 0.06em;
+  }
+
+  .cart-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.2s;
+  }
+
+  .cart-close:hover { color: var(--text); }
+
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 28px;
+  }
+
+  .cart-empty-msg {
+    text-align: center;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding-top: 60px;
+  }
+
+  .cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+
+  .cart-item-info { flex: 1; }
+
+  .cart-item-name {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  .cart-item-by {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .cart-item-price {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .cart-item-remove {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .cart-item-remove:hover { color: var(--text); }
+
+  .cart-footer {
+    padding: 20px 28px 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .cart-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .cart-total-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .cart-total-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    color: var(--gold);
+  }
+
+  .checkout-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .checkout-btn:hover { background: rgba(201,168,76,0.08); }
+
+  /* Section label */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Footer */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 28px 48px;
+    text-align: center;
+  }
+
+  .footer-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+
+  .footer-text a { color: var(--gold-dim); text-decoration: none; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    header, .hero, .controls, .stats-bar, .grid-section, footer {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .grid { grid-template-columns: 1fr; }
+    .hero { padding-top: 48px; padding-bottom: 48px; }
+    .cart-panel { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="home.html" class="back-link">← 返回名冊</a>
+    <a href="home.html" class="logo-zh">職人名冊</a>
+    <button class="cart-btn" onclick="toggleCart()">
+      <span>詢問清單</span>
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">職人服務市集</div>
+  <h1>職人<em>商店</em></h1>
+  <p class="hero-sub">精選服務與作品，每件都由職人親手完成</p>
+</section>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search" placeholder="搜尋服務名稱、標籤、職人…" oninput="filterProducts()">
+    </div>
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab active" onclick="setFilter('all', this)">全部</button>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="count-text">顯示 <span id="countNum">0</span> 項服務</div>
+    <select class="sort-select" id="sortSelect" onchange="filterProducts()">
+      <option value="default">預設排序</option>
+      <option value="price-asc">價格由低到高</option>
+      <option value="price-desc">價格由高到低</option>
+      <option value="available">接案中優先</option>
+    </select>
+  </div>
+</div>
+
+<section class="grid-section">
+  <div class="grid" id="grid"></div>
+</section>
+
+<footer>
+  <p class="footer-text">© 2026 <a href="https://thomas.artigianoapp.net">Artisano</a> — 職人名冊 · 精選服務市集</p>
+</footer>
+
+<!-- Cart Panel -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <span class="cart-title">詢問清單</span>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <p class="cart-empty-msg">尚未加入任何服務</p>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total-row">
+      <span class="cart-total-label">合計估價</span>
+      <span class="cart-total-value" id="cartTotal">NT$ 0</span>
+    </div>
+    <button class="checkout-btn" onclick="sendInquiry()">發送詢問 →</button>
+  </div>
+</div>
+
+<script>
+let allProducts = [];
+let currentFilter = 'all';
+let cart = [];
+
+async function init() {
+  const res = await fetch('shop.json');
+  const data = await res.json();
+  allProducts = data.products;
+
+  // Build category filters
+  const cats = [...new Set(allProducts.map(p => p.category))];
+  const tabs = document.getElementById('filterTabs');
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-tab';
+    btn.textContent = cat;
+    btn.onclick = () => setFilter(cat, btn);
+    tabs.appendChild(btn);
+  });
+
+  render(allProducts);
+}
+
+function setFilter(cat, el) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  filterProducts();
+}
+
+function filterProducts() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+  let list = [...allProducts];
+
+  if (currentFilter !== 'all') {
+    list = list.filter(p => p.category === currentFilter);
+  }
+
+  if (q) {
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.artisan_name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
+      p.tags.some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
+  else if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+  else if (sort === 'available') list.sort((a, b) => (b.available ? 1 : 0) - (a.available ? 1 : 0));
+  else {
+    // Default: featured first
+    list.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+  }
+
+  render(list);
+}
+
+function render(list) {
+  const grid = document.getElementById('grid');
+  document.getElementById('countNum').textContent = list.length;
+
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty">沒有符合的服務項目</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map((p, i) => {
+    const avatarHtml = p.artisan_avatar
+      ? `<img class="artisan-avatar-sm" src="${p.artisan_avatar}" alt="${p.artisan_name}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+         <div class="artisan-avatar-placeholder-sm" style="display:none">${p.artisan_name.charAt(0)}</div>`
+      : `<div class="artisan-avatar-placeholder-sm">${p.artisan_name.charAt(0)}</div>`;
+
+    const imageHtml = p.image
+      ? `<img src="${p.image}" alt="${p.name}">`
+      : `<div class="product-image-placeholder">${p.category.charAt(0)}</div>`;
+
+    const btnClass = p.available ? 'inquire-btn' : 'inquire-btn unavailable';
+    const btnText = p.available ? '加入詢問 +' : '暫停接案';
+    const btnAction = p.available ? `addToCart('${p.id}'); event.stopPropagation();` : '';
+
+    return `
+      <div class="product-card" style="animation-delay:${i * 0.06}s" onclick="goToArtisan('${p.artisan_id}')">
+        ${p.featured ? '<div class="featured-badge">精選</div>' : ''}
+        <div class="product-image">${imageHtml}</div>
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.description}</div>
+        <div class="product-tags">
+          ${p.tags.slice(0, 4).map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+        <div class="product-artisan">
+          ${avatarHtml}
+          <span class="artisan-name-sm">${p.artisan_name}</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price-wrap">
+            <div class="price-label">服務費用</div>
+            <div>
+              <span class="price-value">NT$ ${p.price.toLocaleString()}</span>
+              <span class="price-unit">/ ${p.unit}</span>
+            </div>
+            <div class="product-delivery">⏱ ${p.delivery}</div>
+          </div>
+          <button class="${btnClass}" onclick="${btnAction}">${btnText}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function goToArtisan(id) {
+  window.location.href = `profile.html?id=${id}`;
+}
+
+function addToCart(productId) {
+  const product = allProducts.find(p => p.id === productId);
+  if (!product || !product.available) return;
+
+  const exists = cart.find(c => c.id === productId);
+  if (exists) {
+    alert('此服務已在詢問清單中');
+    return;
+  }
+
+  cart.push(product);
+  updateCartUI();
+  openCart();
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(c => c.id !== productId);
+  updateCartUI();
+}
+
+function updateCartUI() {
+  const count = cart.length;
+  document.getElementById('cartCount').textContent = count;
+
+  const itemsEl = document.getElementById('cartItems');
+  const footerEl = document.getElementById('cartFooter');
+  const totalEl = document.getElementById('cartTotal');
+
+  if (count === 0) {
+    itemsEl.innerHTML = '<p class="cart-empty-msg">尚未加入任何服務</p>';
+    footerEl.style.display = 'none';
+    return;
+  }
+
+  footerEl.style.display = 'block';
+  const total = cart.reduce((sum, p) => sum + p.price, 0);
+  totalEl.textContent = `NT$ ${total.toLocaleString()}`;
+
+  itemsEl.innerHTML = cart.map(p => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${p.name}</div>
+        <div class="cart-item-by">by ${p.artisan_name} · ${p.unit}</div>
+      </div>
+      <span class="cart-item-price">NT$ ${p.price.toLocaleString()}</span>
+      <button class="cart-item-remove" onclick="removeFromCart('${p.id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function toggleCart() {
+  const overlay = document.getElementById('cartOverlay');
+  const panel = document.getElementById('cartPanel');
+  overlay.classList.toggle('open');
+  panel.classList.toggle('open');
+}
+
+function openCart() {
+  document.getElementById('cartOverlay').classList.add('open');
+  document.getElementById('cartPanel').classList.add('open');
+}
+
+function sendInquiry() {
+  if (cart.length === 0) return;
+  const names = cart.map(p => `・${p.name}（by ${p.artisan_name}）`).join('\n');
+  alert(`感謝您的詢問！\n\n您已選擇以下服務：\n${names}\n\n我們會盡快安排職人與您聯繫。`);
+  cart = [];
+  updateCartUI();
+  toggleCart();
+}
+
+init();
+</script>
+</body>
+</html>
