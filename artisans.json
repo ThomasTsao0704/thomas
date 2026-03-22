@@ -8,7 +8,7 @@
     {
       "id": "thomas",
       "name": "Thomas Tsao",
-      "avatar": "https://taiwan.artigianoapp.net/linktree/img/index.jpg",
+      "avatar": "./thomas/linktree/img/index.jpg",
       "title": "全端開發 × AI策略",
       "tagline": "質疑共識而不是依附共識,在資訊洪流中保持清醒,打造長期可複利的人格資產",
       "bio": "專注於台灣股市資料分析與 AI 應用開發，擅長將複雜數據轉化為實用商業洞察。多年全端開發經驗，協助企業以技術創造競爭優勢。",
@@ -26,7 +26,7 @@
     {
       "id": "jim",
       "name": "Jim Liu",
-      "avatar": "https://taiwan.artigianoapp.net/linktree/img/jimliu.png",
+      "avatar": "thomas/linktree/img/jimliu.png",
       "title": "企業貸款 × 資產配置",
       "tagline": "企業信用風險與資金配置決策，結構化判斷提升資產品質與收益，擅長在不確定性中創造可控收益",
       "bio": "專注企業授信與信用風險評估，具備從財務結構與產業趨勢中快速判斷企業價值的能力。在風險控管架構下平衡收益與安全，提升資產品質並優化資金配置效率。擅長高壓環境下決策與跨部門協作，推動授信案件精準落地與長期穩健發展。",
