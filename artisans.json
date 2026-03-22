@@ -24,6 +24,23 @@
       ]
     },
     {
+      "id": "jim",
+      "name": "Jim Liu",
+      "avatar": "",
+      "title": "全端開發 × AI策略",
+      "tagline": "質疑共識而不是依附共識,在資訊洪流中保持清醒,打造長期可複利的人格資產",
+      "bio": "專注於台灣股市資料分析與 AI 應用開發，擅長將複雜數據轉化為實用商業洞察。多年全端開發經驗，協助企業以技術創造競爭優勢。",
+      "tags": ["投資理財", "金融財經", "股市分析", "Python", "資料視覺化"],
+      "category": "金融",
+      "location": "台灣",
+      "available": true,
+      "links": [
+        { "label": "財經資訊", "url": "https://news-seven-beta.vercel.app/", "icon": "globe" },
+        { "label": "即時匯率查詢", "url": "https://thomastsao0704.github.io/WebApp/App1/", "icon": "chart" },
+        { "label": "房貸寬限期完整分析", "url": "https://thomastsao0704.github.io/WebApp/App92", "icon": "github" }
+      ]
+    },
+    {
       "id": "sample-designer",
       "name": "林設計",
       "avatar": "",
