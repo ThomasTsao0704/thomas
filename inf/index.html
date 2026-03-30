@@ -1,0 +1,3050 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>風向解析器 — 判斷力放大器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111114;
+    --surface2: #18181d;
+    --border: #2a2a35;
+    --amber: #f59e0b;
+    --amber-dim: #92610a;
+    --red: #ef4444;
+    --green: #22c55e;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --text: #e8e8ea;
+    --text-dim: #6b6b80;
+    --text-muted: #3a3a4a;
+    --scan: rgba(245, 158, 11, 0.03);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--scan) 2px,
+      var(--scan) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* Noise texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 998;
+    opacity: 0.4;
+  }
+
+  /* Grid background */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(245,158,11,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,158,11,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    margin-bottom: 52px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .logo-block {}
+
+  .logo-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-tag::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--amber);
+    border-radius: 50%;
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  h1 span {
+    color: var(--amber);
+  }
+
+  .subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .header-meta {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  /* ── INPUT SECTION ── */
+  .input-section {
+    margin-bottom: 32px;
+  }
+
+  .input-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .input-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.8;
+    padding: 20px;
+    resize: vertical;
+    min-height: 200px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  textarea::placeholder {
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  textarea:focus {
+    border-color: var(--amber-dim);
+    box-shadow: 0 0 0 1px var(--amber-dim), inset 0 0 20px rgba(245,158,11,0.03);
+  }
+
+  .input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .char-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .char-count span {
+    color: var(--amber);
+  }
+
+  /* ── ANALYZE BUTTON ── */
+  .btn-analyze {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--amber);
+    border: none;
+    padding: 14px 40px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+
+  .btn-analyze::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.4s;
+  }
+
+  .btn-analyze:hover::before { transform: translateX(100%); }
+  .btn-analyze:hover { box-shadow: 0 0 30px rgba(245,158,11,0.4); transform: translateY(-1px); }
+  .btn-analyze:active { transform: translateY(0); }
+  .btn-analyze:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ── LOADING ── */
+  .loading-bar {
+    display: none;
+    margin: 24px 0;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+  }
+
+  .loading-bar.active { display: block; }
+
+  .loading-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    margin-bottom: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--amber);
+    width: 0%;
+    transition: width 0.3s;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    background: var(--amber);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--amber);
+  }
+
+  .loading-steps {
+    margin-top: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  /* ── RESULTS ── */
+  .results {
+    display: none;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .results.visible { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .result-header .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    text-transform: uppercase;
+  }
+
+  .result-header .timestamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  /* Risk badge */
+  .risk-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 4px 12px;
+    text-transform: uppercase;
+  }
+
+  .risk-high { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .risk-medium { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+  .risk-low { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+
+  /* Cards grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+
+  .card-emotion::before { background: linear-gradient(90deg, var(--red), var(--amber)); }
+  .card-bias::before { background: linear-gradient(90deg, var(--blue), var(--purple)); }
+  .card-full { grid-column: 1 / -1; }
+  .card-tactics::before { background: linear-gradient(90deg, var(--amber), transparent); }
+  .card-summary::before { background: linear-gradient(90deg, var(--green), transparent); }
+
+  .card-icon {
+    font-size: 18px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .card-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* Emotion bars */
+  .emotion-item {
+    margin-bottom: 12px;
+  }
+
+  .emotion-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+
+  .emotion-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .emotion-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .bar-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 0;
+    width: 0%;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .bar-fear { background: var(--red); }
+  .bar-anger { background: #f97316; }
+  .bar-doubt { background: var(--amber); }
+  .bar-neutral { background: var(--text-dim); }
+  .bar-positive { background: var(--green); }
+
+  /* Bias meter */
+  .bias-meter {
+    margin-top: 8px;
+  }
+
+  .bias-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .bias-track {
+    height: 8px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bias-fill {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .bias-center {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    width: 1px;
+    height: 12px;
+    background: var(--text-muted);
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  .bias-verdict {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-left: 2px solid var(--purple);
+    color: var(--text);
+  }
+
+  /* Tactics */
+  .tactic-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--text-muted);
+  }
+
+  .tactic-item:last-child { border-bottom: none; }
+
+  .tactic-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .tactic-body {}
+
+  .tactic-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--amber);
+    margin-bottom: 2px;
+  }
+
+  .tactic-desc {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .tactic-severity {
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .sev-high { background: rgba(239,68,68,0.15); color: var(--red); }
+  .sev-medium { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .sev-low { background: rgba(100,100,120,0.15); color: var(--text-dim); }
+
+  /* Summary */
+  .summary-text {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--text-dim);
+    border-left: 2px solid var(--green);
+    padding-left: 16px;
+  }
+
+  .summary-text strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* Overall score */
+  .score-ring {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .score-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--amber);
+    flex-shrink: 0;
+  }
+
+  .score-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .score-verdict {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* Error */
+  .error-msg {
+    display: none;
+    padding: 16px 20px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-left: 3px solid var(--red);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--red);
+    margin: 16px 0;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* Footer */
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  footer p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  footer a {
+    color: var(--amber-dim);
+    text-decoration: none;
+  }
+
+  /* Demo examples */
+  .examples {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .example-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    background: none;
+  }
+
+  .example-chip:hover {
+    border-color: var(--amber-dim);
+    color: var(--amber);
+  }
+
+  /* ── HISTORY PANEL ── */
+  .history-section {
+    margin-top: 60px;
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
+  }
+
+  .history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .history-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .history-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 1px 8px;
+    border-radius: 2px;
+  }
+
+  .history-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-ghost {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .history-empty {
+    padding: 32px 0;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    border: 1px dashed var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .history-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .history-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+  }
+
+  .history-item.risk-high::before  { background: var(--red); }
+  .history-item.risk-med::before   { background: var(--amber); }
+  .history-item.risk-low::before   { background: var(--green); }
+
+  .history-item:hover {
+    border-color: var(--amber-dim);
+    background: var(--surface2);
+  }
+
+  .hi-index {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  .hi-index.risk-high { color: var(--red); }
+  .hi-index.risk-med  { color: var(--amber); }
+  .hi-index.risk-low  { color: var(--green); }
+
+  .hi-body {}
+
+  .hi-preview {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 480px;
+  }
+
+  .hi-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .hi-time {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .hi-risk-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 1px 7px;
+    letter-spacing: 0.08em;
+  }
+
+  .hi-verdict {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  .hi-tactics-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .btn-del {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 6px;
+    line-height: 1;
+    transition: color 0.15s;
+    flex-shrink: 0;
+  }
+
+  .btn-del:hover { color: var(--red); }
+
+  /* Save toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    padding: 12px 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.05em;
+    z-index: 9999;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.25s, opacity 0.25s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Restore indicator on result-header */
+  .restore-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    background: rgba(96,165,250,0.1);
+    border: 1px solid rgba(96,165,250,0.25);
+    color: var(--blue);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── RADAR COMPARE SECTION ── */
+  .radar-section {
+    margin-top: 48px;
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
+    display: none;
+  }
+  .radar-section.visible { display: block; }
+
+  .radar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .radar-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--purple);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .radar-hint {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .radar-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 640px) {
+    .radar-layout { grid-template-columns: 1fr; }
+  }
+
+  /* Picker — checklist of records */
+  .radar-picker {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .picker-header {
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .picker-selected-count {
+    color: var(--purple);
+  }
+
+  .picker-list {
+    max-height: 340px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .picker-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+
+  .picker-item:last-child { border-bottom: none; }
+  .picker-item:hover { background: var(--surface2); }
+
+  .picker-item.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Custom checkbox */
+  .picker-check {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    flex-shrink: 0;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .picker-item.checked .picker-check {
+    border-color: var(--purple);
+    background: var(--purple);
+  }
+
+  .picker-item.checked .picker-check::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    color: #000;
+    line-height: 1;
+  }
+
+  /* Color swatch on checkbox */
+  .picker-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .picker-item.checked .picker-swatch { opacity: 1; }
+
+  .picker-body { flex: 1; min-width: 0; }
+
+  .picker-preview {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+
+  .picker-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .picker-idx {
+    font-weight: 500;
+  }
+
+  .picker-idx.risk-h { color: var(--red); }
+  .picker-idx.risk-m { color: var(--amber); }
+  .picker-idx.risk-l { color: var(--green); }
+
+  /* Chart area */
+  .radar-chart-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    position: relative;
+    min-height: 340px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .radar-placeholder {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  .radar-canvas-wrap {
+    width: 100%;
+    display: none;
+  }
+  .radar-canvas-wrap.visible { display: block; }
+
+  /* Legend below chart */
+  .radar-legend {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Stat comparison row below chart */
+  .radar-stats {
+    margin-top: 14px;
+    display: none;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .radar-stats.visible { display: flex; }
+
+  .stat-chip {
+    flex: 1;
+    min-width: 110px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .stat-chip-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .stat-chip-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .stat-chip-sub {
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ── MODE SWITCHER ── */
+  .mode-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    width: fit-content;
+  }
+
+  .mode-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    position: relative;
+  }
+
+  .mode-btn + .mode-btn {
+    border-left: 1px solid var(--border);
+  }
+
+  .mode-btn.active {
+    background: var(--surface2);
+    color: var(--amber);
+  }
+
+  .mode-btn.active.ai-btn {
+    color: var(--purple);
+  }
+
+  .mode-indicator {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .mode-btn.active .mode-indicator { background: var(--amber); }
+  .mode-btn.active.ai-btn .mode-indicator { background: var(--purple); }
+  .mode-btn:not(.active) .mode-indicator { background: var(--text-muted); }
+
+  /* API key panel */
+  .api-key-panel {
+    display: none;
+    margin-bottom: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--purple);
+    padding: 14px 16px;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .api-key-panel.visible { display: flex; }
+
+  .api-key-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--purple);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .api-key-input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 7px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .api-key-input:focus { border-color: var(--purple); }
+  .api-key-input::placeholder { color: var(--text-muted); }
+
+  .api-key-save {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--bg);
+    background: var(--purple);
+    border: none;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .api-key-save:hover { opacity: 0.85; }
+
+  .api-key-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    width: 100%;
+  }
+
+  /* Local mode badge on result */
+  .local-mode-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.25);
+    color: var(--amber);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── REBUTTAL SECTION ── */
+  .rebuttal-section {
+    display: none;
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--blue);
+    background: var(--surface);
+  }
+
+  .rebuttal-section.visible { display: block; }
+
+  .rebuttal-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .rebuttal-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--blue);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rebuttal-desc {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .rebuttal-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .btn-rebuttal {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--blue);
+    border: none;
+    padding: 9px 22px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: opacity 0.2s, transform 0.15s;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  .btn-rebuttal:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-rebuttal:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-copy-rebuttal {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    display: none;
+  }
+
+  .btn-copy-rebuttal.visible { display: block; }
+  .btn-copy-rebuttal:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* Rebuttal output body */
+  .rebuttal-body {
+    padding: 20px 24px;
+    display: none;
+  }
+
+  .rebuttal-body.visible { display: block; }
+
+  .rebuttal-loading {
+    display: none;
+    padding: 20px 24px;
+  }
+
+  .rebuttal-loading.active { display: block; }
+
+  .rebuttal-loading-bar {
+    height: 2px;
+    background: var(--border);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .rebuttal-loading-bar::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: var(--blue);
+    animation: slide 1.2s ease-in-out infinite;
+  }
+
+  @keyframes slide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  .rebuttal-loading-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--blue);
+    letter-spacing: 0.08em;
+  }
+
+  /* The generated rebuttal text */
+  .rebuttal-output {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 2;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    border-left: 2px solid var(--blue);
+    padding-left: 18px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .rebuttal-meta {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .rebuttal-meta-left {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .rebuttal-notice {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+  }
+
+  /* Local mode fallback inside rebuttal */
+  .rebuttal-local-msg {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    line-height: 1.8;
+    padding: 16px 0;
+    display: none;
+  }
+
+  .rebuttal-local-msg.visible { display: block; }
+
+  /* ── 本機情緒語言標註器 ── */
+  .highlight-section {
+    display: none;
+  }
+  .highlight-section.visible { display: block; }
+
+  .highlight-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .legend-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .legend-tag-swatch {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 2px;
+    font-size: 10px;
+  }
+
+  .hl-sarcasm   { background: rgba(245,158,11,0.22); color: #f59e0b; border-bottom: 2px solid #f59e0b; }
+  .hl-emotional { background: rgba(239,68,68,0.20);  color: #ef4444; border-bottom: 2px solid #ef4444; }
+  .hl-incite    { background: rgba(167,139,250,0.22);color: #a78bfa; border-bottom: 2px solid #a78bfa; }
+  .hl-absolute  { background: rgba(96,165,250,0.18); color: #60a5fa; border-bottom: 2px solid #60a5fa; }
+
+  /* Highlighted word (inline span inside article) */
+  mark.hl-sarcasm, mark.hl-emotional, mark.hl-incite, mark.hl-absolute {
+    background: transparent;
+    padding: 0 1px;
+    border-radius: 2px;
+    cursor: default;
+    position: relative;
+    font-style: normal;
+  }
+  mark.hl-sarcasm   { background: rgba(245,158,11,0.18); color: #f59e0b; border-bottom: 2px solid #f59e0b; }
+  mark.hl-emotional { background: rgba(239,68,68,0.18);  color: #ef4444; border-bottom: 2px solid #ef4444; }
+  mark.hl-incite    { background: rgba(167,139,250,0.18);color: #a78bfa; border-bottom: 2px solid #a78bfa; }
+  mark.hl-absolute  { background: rgba(96,165,250,0.15); color: #60a5fa; border-bottom: 2px solid #60a5fa; }
+
+  /* Tooltip on hover */
+  mark[data-tip] { cursor: help; }
+  mark[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    padding: 4px 8px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .highlight-article {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 2.1;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    padding: 20px 24px;
+    border-left: 2px solid var(--amber);
+  }
+
+  .highlight-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .hstat-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+  }
+
+  .hstat-chip .hstat-num {
+    font-size: 14px;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 1px;
+  }
+
+  .hstat-chip.hs-sarcasm   .hstat-num { color: #f59e0b; }
+  .hstat-chip.hs-emotional .hstat-num { color: #ef4444; }
+  .hstat-chip.hs-incite    .hstat-num { color: #a78bfa; }
+  .hstat-chip.hs-absolute  .hstat-num { color: #60a5fa; }
+
+  .hstat-chip .hstat-label { color: var(--text-muted); font-size: 9px; }</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<div class="wrapper">
+  <!-- HEADER -->
+  <header>
+    <div class="logo-block">
+      <div class="logo-tag">SIGNAL INTELLIGENCE v0.1</div>
+      <h1>風向<span>解析器</span></h1>
+      <p class="subtitle">// 判斷力放大器 · Judgment Amplifier · 媒體操控偵測</p>
+    </div>
+    <div class="header-meta">
+      <div>MODEL: claude-sonnet-4</div>
+      <div>LANG: zh-TW</div>
+      <div>STATUS: <span style="color:var(--green)">ONLINE</span></div>
+    </div>
+  </header>
+
+  <!-- MODE SWITCHER -->
+  <div style="margin-bottom:4px;">
+    <div class="mode-bar">
+      <button class="mode-btn active" id="localModeBtn" onclick="setMode('local')">
+        <span class="mode-indicator"></span>本機模式
+      </button>
+      <button class="mode-btn ai-btn" id="aiModeBtn" onclick="setMode('ai')">
+        <span class="mode-indicator"></span>AI 模式
+      </button>
+    </div>
+    <div id="modeDesc" style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:6px;letter-spacing:0.05em;">
+      // 純規則分析，無需 API · 免費 · 離線可用
+    </div>
+  </div>
+
+  <!-- API KEY PANEL -->
+  <div class="api-key-panel" id="apiKeyPanel">
+    <span class="api-key-label">API KEY //</span>
+    <input class="api-key-input" id="apiKeyInput" type="password"
+           placeholder="sk-ant-api03-…" autocomplete="off" spellcheck="false">
+    <button class="api-key-save" onclick="saveApiKey()">儲存</button>
+    <div class="api-key-status" id="apiKeyStatus">// Key 僅存於本機 localStorage，不會上傳</div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-section">
+    <div class="input-label">INPUT // 貼上新聞文章</div>
+    <textarea id="newsInput" placeholder="// 將新聞全文貼在這裡...
+// 支援：新聞報導、社群貼文、評論文章
+// 建議長度：100 字以上效果更佳"></textarea>
+
+    <div class="input-footer">
+      <div>
+        <div class="char-count">字數：<span id="charCount">0</span></div>
+        <div class="examples">
+          <button class="example-chip" onclick="loadExample(1)">▸ 範例 1：政治新聞</button>
+          <button class="example-chip" onclick="loadExample(2)">▸ 範例 2：經濟報導</button>
+          <button class="example-chip" onclick="loadExample(3)">▸ 範例 3：社群貼文</button>
+        </div>
+      </div>
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">
+        ▶ 開始分析
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-bar" id="loadingBar">
+    <div class="loading-label">⬡ ANALYZING — 正在掃描文章風向...</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="loading-steps" id="loadingSteps">
+      › 初始化 NLP 分析引擎...
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="result-header">
+      <div class="label">⬡ ANALYSIS COMPLETE</div>
+      <div id="riskBadge" class="risk-badge"></div>
+      <div class="timestamp" id="timestamp"></div>
+    </div>
+
+    <!-- Score -->
+    <div class="score-ring">
+      <div class="score-number" id="scoreNum">—</div>
+      <div>
+        <div class="score-label">MANIPULATION INDEX // 操控指數</div>
+        <div class="score-verdict" id="scoreVerdict">—</div>
+      </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards-grid">
+      <!-- Emotion Card -->
+      <div class="card card-emotion">
+        <span class="card-icon">🔍</span>
+        <div class="card-title">EMOTION SCAN // 情緒偵測</div>
+        <div id="emotionBars"></div>
+      </div>
+
+      <!-- Bias Card -->
+      <div class="card card-bias">
+        <span class="card-icon">🧭</span>
+        <div class="card-title">BIAS METER // 立場傾向</div>
+        <div class="bias-meter" id="biasMeter"></div>
+      </div>
+
+      <!-- Tactics Card (full width) -->
+      <div class="card card-tactics card-full">
+        <span class="card-icon">⚠️</span>
+        <div class="card-title">TACTICS DETECTED // 操作手法標記</div>
+        <div id="tacticsList"></div>
+      </div>
+
+      <!-- Summary Card (full width) -->
+      <div class="card card-summary card-full">
+        <span class="card-icon">📋</span>
+        <div class="card-title">VERDICT // 分析結論</div>
+        <div class="summary-text" id="summaryText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REBUTTAL SECTION -->
+  <div class="rebuttal-section" id="rebuttalSection">
+    <div class="rebuttal-top">
+      <div>
+        <div class="rebuttal-label">✍ REBUTTAL // 冷靜反駁文生成</div>
+        <div class="rebuttal-desc" style="margin-top:6px;">
+          區分事實與詮釋，找出「從事實跳到結論」的位置，生成可公開發表的理性反駁。
+        </div>
+      </div>
+      <div class="rebuttal-actions">
+        <button class="btn-copy-rebuttal" id="btnCopyRebuttal" onclick="copyRebuttal()">⎘ 複製</button>
+        <button class="btn-rebuttal" id="btnRebuttal" onclick="generateRebuttal()">▶ 生成反駁文</button>
+      </div>
+    </div>
+
+    <!-- Local mode message -->
+    <div class="rebuttal-local-msg" id="rebuttalLocalMsg" style="padding:14px 20px;">
+      // 本機模式不支援生成自然語言文章<br>
+      // 請切換至「AI 模式」並輸入 API Key 以生成完整反駁文<br>
+      <span style="color:var(--text-muted)">// 已自動執行「情緒語言標註」↓</span>
+    </div>
+
+    <!-- 本機模式：情緒語言標註區塊 -->
+    <div class="highlight-section" id="highlightSection">
+      <div class="highlight-legend">
+        <span class="legend-tag">
+          <span class="legend-tag-swatch hl-sarcasm">嘲諷語氣</span>
+          如：竟然、所謂、說得好聽
+        </span>
+        <span class="legend-tag">
+          <span class="legend-tag-swatch hl-emotional">情緒語言</span>
+          如：完蛋、憤慨、恐慌
+        </span>
+        <span class="legend-tag">
+          <span class="legend-tag-swatch hl-incite">煽動詞彙</span>
+          如：緊急擴散、快分享
+        </span>
+        <span class="legend-tag">
+          <span class="legend-tag-swatch hl-absolute">主觀斷言</span>
+          如：根本就是、顯然、絕對
+        </span>
+      </div>
+      <div class="highlight-article" id="highlightArticle"></div>
+      <div class="highlight-stats" id="highlightStats"></div>
+    </div>
+
+    <!-- Loading bar -->
+    <div class="rebuttal-loading" id="rebuttalLoading">
+      <div class="rebuttal-loading-bar"></div>
+      <div class="rebuttal-loading-text" id="rebuttalLoadingText">⬡ 正在分析文章結構...</div>
+    </div>
+
+    <!-- Output -->
+    <div class="rebuttal-body" id="rebuttalBody">
+      <div class="rebuttal-output" id="rebuttalOutput"></div>
+      <div class="rebuttal-meta">
+        <div class="rebuttal-meta-left" id="rebuttalMetaLeft"></div>
+        <div class="rebuttal-notice">⚠ AI 生成內容，僅供參考，請自行判斷</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RADAR COMPARE SECTION -->
+  <div class="radar-section" id="radarSection">
+    <div class="radar-header">
+      <div class="radar-title">
+        ◈ COMPARE // 雷達圖比較
+      </div>
+      <div class="radar-hint">最多同時比較 4 篇 · 勾選左側記錄</div>
+    </div>
+
+    <div class="radar-layout">
+      <!-- Left: picker -->
+      <div class="radar-picker">
+        <div class="picker-header">
+          <span>選擇比較對象</span>
+          <span class="picker-selected-count" id="pickerCount">已選 0 / 4</span>
+        </div>
+        <div class="picker-list" id="pickerList"></div>
+      </div>
+
+      <!-- Right: chart + legend + stats -->
+      <div>
+        <div class="radar-chart-wrap">
+          <div class="radar-placeholder" id="radarPlaceholder">
+            // 請勾選至少 1 筆記錄<br>以生成比較圖表
+          </div>
+          <div class="radar-canvas-wrap" id="radarCanvasWrap">
+            <canvas id="radarCanvas"></canvas>
+          </div>
+        </div>
+        <div class="radar-legend" id="radarLegend"></div>
+        <div class="radar-stats" id="radarStats"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY PANEL -->
+  <div class="history-section" id="historySection">
+    <div class="history-header">
+      <div class="history-title">
+        ◈ 分析記錄
+        <span class="history-count" id="historyCount">0 筆</span>
+      </div>
+      <div class="history-actions">
+        <button class="btn-ghost" onclick="clearAllRecords()">✕ 清除全部</button>
+      </div>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>風向解析器 · 本工具輔助判斷，不構成事實認定</p>
+    <p>Powered by Claude AI · <span style="color:var(--text-muted)">ANTHROPIC</span></p>
+  </footer>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ════════════════════════════════════
+     雷達圖比較系統
+  ════════════════════════════════════ */
+
+  // 4 色系，對應選取順序
+  const RADAR_COLORS = [
+    { stroke: '#f59e0b', fill: 'rgba(245,158,11,0.15)', swatch: '#f59e0b' },  // amber
+    { stroke: '#60a5fa', fill: 'rgba(96,165,250,0.15)',  swatch: '#60a5fa' },  // blue
+    { stroke: '#a78bfa', fill: 'rgba(167,139,250,0.15)', swatch: '#a78bfa' },  // purple
+    { stroke: '#34d399', fill: 'rgba(52,211,153,0.15)',  swatch: '#34d399' },  // teal
+  ];
+
+  const RADAR_AXES = ['恐懼', '憤怒', '懷疑', '正面', '中立'];
+
+  let selectedIds = [];   // ordered list of selected record IDs
+  let radarChart  = null;
+
+  function togglePicker(id) {
+    const idx = selectedIds.indexOf(id);
+    if (idx > -1) {
+      selectedIds.splice(idx, 1);
+    } else {
+      if (selectedIds.length >= 4) {
+        showToast('⚠ 最多同時比較 4 篇');
+        return;
+      }
+      selectedIds.push(id);
+    }
+    renderPickerUI();
+    renderRadar();
+  }
+
+  function renderPickerUI() {
+    const records = loadRecords();
+    const pickerList = document.getElementById('pickerList');
+    document.getElementById('pickerCount').textContent =
+      `已選 ${selectedIds.length} / 4`;
+
+    if (!records.length) {
+      pickerList.innerHTML = `
+        <div style="padding:20px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);">
+          // 尚無記錄可選
+        </div>`;
+      return;
+    }
+
+    const riskIdxClass = { '高': 'risk-h', '中': 'risk-m', '低': 'risk-l' };
+
+    pickerList.innerHTML = records.map(r => {
+      const selIdx = selectedIds.indexOf(r.id);
+      const isChecked  = selIdx > -1;
+      const isDisabled = !isChecked && selectedIds.length >= 4;
+      const color = isChecked ? RADAR_COLORS[selIdx] : null;
+      const mi  = r.data.manipulation_index ?? '—';
+      const rl  = r.data.risk_level || '中';
+
+      return `
+      <div class="picker-item ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}"
+           onclick="togglePicker(${r.id})">
+        <div class="picker-check"></div>
+        <div class="picker-swatch"
+             style="background:${color ? color.swatch : 'transparent'}"></div>
+        <div class="picker-body">
+          <div class="picker-preview">${escHtml(r.preview)}</div>
+          <div class="picker-meta">
+            <span class="picker-idx ${riskIdxClass[rl]}">${mi}</span>
+            <span>${r.timestamp.slice(5, 16)}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderRadar() {
+    const records    = loadRecords();
+    const canvasWrap = document.getElementById('radarCanvasWrap');
+    const placeholder = document.getElementById('radarPlaceholder');
+    const legendEl   = document.getElementById('radarLegend');
+    const statsEl    = document.getElementById('radarStats');
+
+    if (!selectedIds.length) {
+      canvasWrap.classList.remove('visible');
+      placeholder.style.display = '';
+      legendEl.innerHTML = '';
+      statsEl.classList.remove('visible');
+      if (radarChart) { radarChart.destroy(); radarChart = null; }
+      return;
+    }
+
+    placeholder.style.display = 'none';
+    canvasWrap.classList.add('visible');
+
+    const selected = selectedIds
+      .map(id => records.find(r => r.id === id))
+      .filter(Boolean);
+
+    const datasets = selected.map((rec, i) => {
+      const c  = RADAR_COLORS[i];
+      const em = rec.data.emotions || {};
+      return {
+        label: rec.preview.slice(0, 18) + '…',
+        data: RADAR_AXES.map(axis => em[axis] ?? 0),
+        borderColor: c.stroke,
+        backgroundColor: c.fill,
+        borderWidth: 2,
+        pointBackgroundColor: c.stroke,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      };
+    });
+
+    // Rebuild chart
+    if (radarChart) radarChart.destroy();
+
+    const ctx = document.getElementById('radarCanvas').getContext('2d');
+    radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: { labels: RADAR_AXES, datasets },
+      options: {
+        responsive: true,
+        animation: { duration: 400 },
+        scales: {
+          r: {
+            min: 0,
+            max: 100,
+            ticks: {
+              stepSize: 25,
+              color: '#3a3a4a',
+              backdropColor: 'transparent',
+              font: { family: "'IBM Plex Mono', monospace", size: 9 },
+            },
+            grid:        { color: '#2a2a35' },
+            angleLines:  { color: '#2a2a35' },
+            pointLabels: {
+              color: '#6b6b80',
+              font: { family: "'IBM Plex Mono', monospace", size: 11 },
+            },
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#18181d',
+            borderColor: '#2a2a35',
+            borderWidth: 1,
+            titleColor: '#f59e0b',
+            bodyColor: '#6b6b80',
+            titleFont: { family: "'IBM Plex Mono', monospace", size: 10 },
+            bodyFont:  { family: "'IBM Plex Mono', monospace", size: 10 },
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}：${ctx.raw}%`
+            }
+          }
+        }
+      }
+    });
+
+    // Legend
+    legendEl.innerHTML = selected.map((rec, i) => {
+      const c = RADAR_COLORS[i];
+      const mi = rec.data.manipulation_index ?? '—';
+      const rl = rec.data.risk_level || '中';
+      const riskColor = { '高': 'var(--red)', '中': 'var(--amber)', '低': 'var(--green)' }[rl];
+      return `
+        <div class="legend-item">
+          <div class="legend-dot" style="background:${c.swatch}"></div>
+          <span>${escHtml(rec.preview.slice(0, 20))}…</span>
+          <span style="color:${riskColor};font-weight:500">${mi}</span>
+        </div>`;
+    }).join('');
+
+    // Stats comparison
+    if (selected.length >= 2) {
+      statsEl.classList.add('visible');
+
+      // Find highest manipulation index
+      const maxMI = selected.reduce((a, b) =>
+        (b.data.manipulation_index ?? 0) > (a.data.manipulation_index ?? 0) ? b : a);
+      const minMI = selected.reduce((a, b) =>
+        (b.data.manipulation_index ?? 100) < (a.data.manipulation_index ?? 100) ? b : a);
+
+      // Dominant emotion per record (first in each)
+      const domEmotions = selected.map(rec => {
+        const em = rec.data.emotions || {};
+        const top = Object.entries(em).sort((a, b) => b[1] - a[1])[0];
+        return top ? `${top[0]} ${top[1]}%` : '—';
+      });
+
+      // Avg manipulation index
+      const avgMI = Math.round(
+        selected.reduce((s, r) => s + (r.data.manipulation_index ?? 0), 0) / selected.length
+      );
+
+      statsEl.innerHTML = `
+        <div class="stat-chip">
+          <div class="stat-chip-label">最高操控指數</div>
+          <div class="stat-chip-value" style="color:var(--red)">${maxMI.data.manipulation_index ?? '—'}</div>
+          <div class="stat-chip-sub">${escHtml(maxMI.preview.slice(0, 16))}…</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-chip-label">最低操控指數</div>
+          <div class="stat-chip-value" style="color:var(--green)">${minMI.data.manipulation_index ?? '—'}</div>
+          <div class="stat-chip-sub">${escHtml(minMI.preview.slice(0, 16))}…</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-chip-label">平均操控指數</div>
+          <div class="stat-chip-value">${avgMI}</div>
+          <div class="stat-chip-sub">${selected.length} 篇文章</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-chip-label">各篇主導情緒</div>
+          <div class="stat-chip-value" style="font-size:11px;line-height:1.6">
+            ${domEmotions.map((e, i) => `<span style="color:${RADAR_COLORS[i].swatch}">${e}</span>`).join('　')}
+          </div>
+        </div>`;
+    } else {
+      statsEl.classList.remove('visible');
+    }
+  }
+
+  function updateRadarSectionVisibility() {
+    const records = loadRecords();
+    const section = document.getElementById('radarSection');
+    if (records.length >= 1) {
+      section.classList.add('visible');
+    } else {
+      section.classList.remove('visible');
+      selectedIds = [];
+      if (radarChart) { radarChart.destroy(); radarChart = null; }
+    }
+  }
+
+  /* ════════════════════════════════════
+     localStorage 分析記錄系統
+  ════════════════════════════════════ */
+  const LS_KEY = 'fengxiang_records_v1';
+
+  function loadRecords() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function saveRecords(records) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(records)); }
+    catch(e) { console.warn('localStorage 儲存失敗', e); }
+  }
+
+  function addRecord(data, rawText) {
+    const records = loadRecords();
+    const record = {
+      id: Date.now(),
+      timestamp: new Date().toLocaleString('zh-TW', { hour12: false }),
+      preview: rawText.replace(/\s+/g, ' ').trim().slice(0, 55),
+      data
+    };
+    records.unshift(record);
+    if (records.length > 50) records.pop();
+    saveRecords(records);
+    renderHistory();
+    updateRadarSectionVisibility();
+    renderPickerUI();
+    showToast('✓ 已儲存至分析記錄');
+  }
+
+  function deleteRecord(id) {
+    // Remove from selection if present
+    const selIdx = selectedIds.indexOf(id);
+    if (selIdx > -1) selectedIds.splice(selIdx, 1);
+    saveRecords(loadRecords().filter(r => r.id !== id));
+    renderHistory();
+    updateRadarSectionVisibility();
+    renderPickerUI();
+    renderRadar();
+    showToast('記錄已刪除');
+  }
+
+  function clearAllRecords() {
+    if (!loadRecords().length) return;
+    if (!confirm('確定要清除所有分析記錄嗎？此操作無法復原。')) return;
+    localStorage.removeItem(LS_KEY);
+    selectedIds = [];
+    if (radarChart) { radarChart.destroy(); radarChart = null; }
+    renderHistory();
+    updateRadarSectionVisibility();
+    renderPickerUI();
+    showToast('✓ 已清除全部記錄');
+  }
+
+  function renderHistory() {
+    const records = loadRecords();
+    document.getElementById('historyCount').textContent = records.length + ' 筆';
+
+    const listEl = document.getElementById('historyList');
+    if (!records.length) {
+      listEl.innerHTML = `<div class="history-empty">// 尚無分析記錄 · 完成第一次分析後自動儲存</div>`;
+      return;
+    }
+
+    const riskClass  = { '高': 'risk-high', '中': 'risk-med',    '低': 'risk-low' };
+    const riskBadge  = { '高': 'risk-high', '中': 'risk-medium', '低': 'risk-low' };
+    const riskLabel  = { '高': '⚠ 高風險',  '中': '◈ 中風險',   '低': '✓ 低風險' };
+    const idxColor   = { '高': 'risk-high', '中': 'risk-med',    '低': 'risk-low' };
+
+    listEl.innerHTML = records.map(r => {
+      const mi = r.data.manipulation_index ?? '—';
+      const rl = r.data.risk_level || '中';
+      const tc = (r.data.tactics || []).length;
+      const verdict = escHtml((r.data.verdict || '').slice(0, 38));
+      return `
+      <div class="history-item ${riskClass[rl]}" onclick="restoreRecord(${r.id})" title="點擊還原此筆記錄">
+        <div class="hi-index ${idxColor[rl]}">${mi}</div>
+        <div class="hi-body">
+          <div class="hi-preview">${escHtml(r.preview)}</div>
+          <div class="hi-meta">
+            <span class="hi-time">${r.timestamp}</span>
+            <span class="hi-risk-badge risk-badge ${riskBadge[rl]}">${riskLabel[rl]}</span>
+            <span class="hi-tactics-count">⚠ ${tc} 個手法</span>
+          </div>
+        </div>
+        <div class="hi-verdict">${verdict}${verdict.length >= 38 ? '…' : ''}</div>
+        <button class="btn-del" onclick="event.stopPropagation();deleteRecord(${r.id})" title="刪除此筆">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  function restoreRecord(id) {
+    const rec = loadRecords().find(r => r.id === id);
+    if (!rec) return;
+
+    // Remove old restore chip if any
+    document.querySelector('.restore-chip')?.remove();
+
+    // Add restore chip to result header
+    const chip = document.createElement('div');
+    chip.className = 'restore-chip';
+    chip.textContent = '↺ 從記錄還原';
+    document.querySelector('.result-header').appendChild(chip);
+
+    // Override timestamp to original
+    renderResults(rec.data, rec.timestamp);
+
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast('↺ 已還原：' + rec.preview.slice(0, 22) + '…');
+  }
+
+  function escHtml(str) {
+    return String(str ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Toast ── */
+  let _toastTimer;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  /* ════════════════════════════════════
+     範例文章
+  ════════════════════════════════════ */
+  const EXAMPLES = {
+    1: `台灣淪陷！政府無能讓通膨失控，一般民眾根本活不下去！
+
+根據最新數據，食品價格暴漲30%，物價指數創下近20年新高。專家警告，如果政府繼續無所作為，未來半年內恐怕將有大批民眾無法負擔基本生活。
+
+對此，執政黨不但沒有提出任何解方，閣員反而出席高檔餐廳聚會，完全無視人民的痛苦。網友怒批：「這種政府還要繼續忍嗎？」
+
+反觀鄰國，同樣面對通膨壓力，但在政策精準調控下，民眾生活品質不降反升。我們的政府到底在做什麼？`,
+    2: `科技泡沫即將再度爆發？專家示警投資人當心血本無歸
+
+華爾街知名分析師昨日發出嚴重警告，認為目前AI相關股票的估值已嚴重泡沫化，與2000年科技泡沫高度相似。他指出，許多公司本益比已超過100倍，毫無基本面支撐。
+
+「這是我30年職業生涯中見過最危險的市場」，這位不願具名的分析師表示，散戶投資人正在重蹈覆轍，盲目追高終將付出慘痛代價。
+
+儘管部分分析師持不同看法，認為AI的長期價值尚未被充分定價，但多數市場觀察人士對短期走勢抱持悲觀態度。`,
+    3: `【緊急擴散】驚！政府偷偷修法要沒收人民財產？！
+
+今天有消息人士爆料，立法院正在密室討論一項前所未有的法案，內容竟然是在「特定情況下」可以沒收私人財產！！
+
+這項法案根本就是第二個土改！是打壓中產階級的陰謀！大家快告訴家人朋友，不分藍綠都要站出來阻止！
+
+原文連結（已被刪除）
+
+#人民要覺醒 #財產保衛戰 #政府黑手`
+  };
+
+  /* ════════════════════════════════════
+     UI helpers
+  ════════════════════════════════════ */
+  const textarea  = document.getElementById('newsInput');
+  const charCount = document.getElementById('charCount');
+
+  textarea.addEventListener('input', () => {
+    charCount.textContent = textarea.value.length;
+  });
+
+  function loadExample(n) {
+    textarea.value = EXAMPLES[n];
+    charCount.textContent = EXAMPLES[n].length;
+  }
+
+  function setProgress(pct, step) {
+    document.getElementById('progressFill').style.width = pct + '%';
+    if (step) document.getElementById('loadingSteps').textContent = '› ' + step;
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = '⚠ ' + msg;
+    el.classList.add('visible');
+  }
+
+  /* ════════════════════════════════════
+     模式切換 & API Key 管理
+  ════════════════════════════════════ */
+  const AK_KEY   = 'fengxiang_apikey';
+  const MODE_KEY = 'fengxiang_mode';
+  let currentMode = localStorage.getItem(MODE_KEY) || 'local';
+
+  function setMode(mode) {
+    currentMode = mode;
+    localStorage.setItem(MODE_KEY, mode);
+    document.getElementById('localModeBtn').classList.toggle('active', mode === 'local');
+    document.getElementById('aiModeBtn').classList.toggle('active', mode === 'ai');
+    document.getElementById('apiKeyPanel').classList.toggle('visible', mode === 'ai');
+    document.getElementById('modeDesc').textContent = mode === 'local'
+      ? '// 純規則分析，無需 API · 免費 · 離線可用'
+      : '// 使用 Claude AI 深度語意分析 · 需 Anthropic API Key';
+    document.getElementById('analyzeBtn').textContent =
+      mode === 'local' ? '▶ 本機分析' : '▶ AI 分析';
+    if (mode === 'ai') loadApiKeyUI();
+  }
+
+  function saveApiKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key.startsWith('sk-ant-')) {
+      document.getElementById('apiKeyStatus').textContent = '⚠ Key 格式錯誤，應以 sk-ant- 開頭';
+      document.getElementById('apiKeyStatus').style.color = 'var(--red)';
+      return;
+    }
+    localStorage.setItem(AK_KEY, key);
+    document.getElementById('apiKeyStatus').textContent = '✓ 已儲存';
+    document.getElementById('apiKeyStatus').style.color = 'var(--green)';
+    setTimeout(() => {
+      document.getElementById('apiKeyStatus').textContent = '// Key 僅存於本機 localStorage，不會上傳';
+      document.getElementById('apiKeyStatus').style.color = '';
+    }, 2000);
+  }
+
+  function loadApiKeyUI() {
+    const saved = localStorage.getItem(AK_KEY) || '';
+    if (saved) {
+      document.getElementById('apiKeyInput').value = saved;
+      document.getElementById('apiKeyStatus').textContent = `✓ 已載入 Key（${saved.slice(0,12)}…）`;
+      document.getElementById('apiKeyStatus').style.color = 'var(--green)';
+    }
+  }
+
+  /* ════════════════════════════════════
+     本機分析引擎 v2 — 句子級 NLP 管線
+     架構：詞庫 → 句子切分 → 情緒/立場評分
+           → 聚合指標 → 風險評分 → 輸出對應
+  ════════════════════════════════════ */
+
+  // ── 1. 詞庫定義（含加權分數）──────────────────
+  const emotionDict = {
+    憤怒: [
+      {w:'荒謬',s:2},{w:'可惡',s:3},{w:'垃圾',s:3},{w:'廢物',s:3},
+      {w:'無恥',s:3},{w:'可恥',s:3},{w:'痛批',s:3},{w:'痛罵',s:3},
+      {w:'狠批',s:3},{w:'炮轟',s:3},{w:'怒批',s:3},{w:'強烈譴責',s:3},
+      {w:'嚴斥',s:2},{w:'聲討',s:2},{w:'忍無可忍',s:3},{w:'憤慨',s:3},
+      {w:'憤怒',s:3},{w:'氣急敗壞',s:3},{w:'嗆聲',s:2},{w:'嗆',s:1},
+      {w:'豈可',s:2},{w:'豈能',s:2},{w:'豈止',s:2},{w:'可悲',s:2},
+      {w:'廉恥',s:2},{w:'抗議',s:2},{w:'出賣',s:3},{w:'背叛',s:3},
+      {w:'怒',s:1},{w:'批',s:1},{w:'罵',s:2},{w:'廢',s:2},{w:'爛',s:2},
+    ],
+    恐懼: [
+      {w:'危機',s:2},{w:'崩潰',s:3},{w:'失控',s:2},{w:'恐慌',s:3},
+      {w:'噩夢',s:3},{w:'災難',s:3},{w:'浩劫',s:3},{w:'毀滅',s:3},
+      {w:'滅亡',s:3},{w:'完蛋',s:3},{w:'垮台',s:3},{w:'滅頂',s:3},
+      {w:'崩壞',s:3},{w:'末日',s:3},{w:'絕望',s:3},{w:'惶恐',s:2},
+      {w:'告急',s:2},{w:'嚴峻',s:1},{w:'岌岌可危',s:3},{w:'可怕',s:2},
+      {w:'驚恐',s:2},{w:'危亡',s:3},{w:'淪陷',s:3},{w:'崩盤',s:3},
+      {w:'暴跌',s:2},{w:'血本無歸',s:3},{w:'一蹶不振',s:2},
+      {w:'恐',s:1},{w:'慘',s:1},{w:'嚇',s:1},{w:'怕',s:1},
+    ],
+    懷疑: [
+      {w:'陰謀',s:3},{w:'黑幕',s:3},{w:'騙局',s:3},{w:'謊言',s:3},
+      {w:'勾結',s:3},{w:'包庇',s:3},{w:'黑手',s:3},{w:'貪腐',s:3},
+      {w:'質疑',s:2},{w:'不透明',s:2},{w:'隱瞞',s:2},{w:'密室',s:2},
+      {w:'幕後',s:2},{w:'暗中',s:2},{w:'不可告人',s:3},{w:'貓膩',s:2},
+      {w:'暗盤',s:2},{w:'見不得光',s:3},{w:'偷偷',s:2},{w:'祕密',s:1},
+      {w:'疑',s:1},{w:'謊',s:2},{w:'假',s:1},{w:'騙',s:2},
+    ],
+    正面: [
+      {w:'成功',s:2},{w:'突破',s:2},{w:'進步',s:2},{w:'穩定',s:1},
+      {w:'希望',s:2},{w:'光明',s:1},{w:'佳績',s:2},{w:'喜訊',s:2},
+      {w:'振奮',s:2},{w:'肯定',s:2},{w:'積極',s:1},{w:'貢獻',s:2},
+      {w:'改善',s:2},{w:'提升',s:2},{w:'繁榮',s:2},{w:'安定',s:1},
+      {w:'支持',s:1},{w:'合理',s:1},{w:'正確',s:1},{w:'有效',s:2},
+      {w:'讚',s:1},{w:'好',s:1},{w:'優',s:1},
+    ],
+  };
+
+  const stanceDict = {
+    正面: [
+      {w:'支持',s:2},{w:'合理',s:1},{w:'正確',s:2},{w:'英明',s:3},
+      {w:'有效',s:2},{w:'出色',s:2},{w:'卓越',s:2},{w:'繁榮',s:2},
+      {w:'穩定',s:1},{w:'改善',s:2},{w:'良好',s:1},{w:'進步',s:2},
+    ],
+    負面: [
+      {w:'錯誤',s:2},{w:'批評',s:2},{w:'無能',s:3},{w:'失職',s:3},
+      {w:'腐敗',s:3},{w:'失敗',s:3},{w:'倒退',s:2},{w:'惡化',s:2},
+      {w:'不作為',s:3},{w:'無所作為',s:3},{w:'一塌糊塗',s:3},
+      {w:'問題嚴重',s:2},{w:'置之不理',s:2},{w:'差勁',s:2},
+      {w:'廢',s:2},{w:'爛',s:2},{w:'亂',s:1},
+    ],
+  };
+
+  // ── 2. 語言修飾詞 ──────────────────────────────
+  const negations    = ['不','不是','沒有','未','非','並非','根本不','完全不'];
+  const intensifiers = ['非常','極度','嚴重','格外','相當','十分','極其','極為','高度'];
+  const extremeWords = ['一定','絕對','完全','全部','所有','永遠','必然','肯定','不可能','根本就'];
+  const vagueSources = ['有專家指出','外界認為','據說','有人認為','消息人士','不願具名',
+                        '知情人士','據悉','據傳','內部人士','爆料','傳出'];
+  const conclusionWords = ['因此','顯然','可見','證明','足以證明','由此可知',
+                           '不難發現','說明了','可以確定','這就是','這才是'];
+  const counterviewWords = ['但是','但也','但其實','另一方面','也有人','反對者',
+                            '不同看法','另有觀點','然而','不過','有人認為'];
+  const urgencyWords = ['緊急擴散','快分享','必看','震驚','爆炸性','重大消息',
+                        '【緊急】','立刻','馬上告訴'];
+
+  // ── 3. 工具函式 ────────────────────────────────
+  function splitSentences(text) {
+    return text.split(/[。！？!?\n]/).map(s => s.trim()).filter(s => s.length > 1);
+  }
+
+  function includesAny(text, words) {
+    return words.some(w => text.includes(w));
+  }
+
+  function countOccurrences(text, word) {
+    let n = 0, idx = 0;
+    while ((idx = text.indexOf(word, idx)) !== -1) { n++; idx += word.length; }
+    return n;
+  }
+
+  // ── 4. 單句情緒評分（含否定反轉 + 強度加權）──
+  function scoreSentenceEmotion(sentence) {
+    const scores = { 憤怒: 0, 恐懼: 0, 懷疑: 0, 正面: 0 };
+    const hasNeg = includesAny(sentence, negations);
+    const intensMult = includesAny(sentence, intensifiers) ? 1.6 : 1.0;
+
+    for (const [cat, entries] of Object.entries(emotionDict)) {
+      for (const {w, s} of entries) {
+        if (!sentence.includes(w)) continue;
+        let score = s * intensMult * countOccurrences(sentence, w);
+        // 否定詞：正面情緒反轉為懷疑，負面情緒減弱
+        if (hasNeg) {
+          if (cat === '正面') { scores.懷疑 += score * 0.5; continue; }
+          score *= 0.5;
+        }
+        scores[cat] += score;
+      }
+    }
+    return scores;
+  }
+
+  // ── 5. 單句立場評分（含否定反轉）──────────────
+  function scoreSentenceStance(sentence) {
+    const scores = { 正面: 0, 負面: 0 };
+    const hasNeg = includesAny(sentence, negations);
+
+    for (const [cat, entries] of Object.entries(stanceDict)) {
+      for (const {w, s} of entries) {
+        if (!sentence.includes(w)) continue;
+        let score = s * countOccurrences(sentence, w);
+        if (hasNeg) score *= -1;   // 否定反轉立場
+        scores[cat] += score;
+      }
+    }
+    return scores;
+  }
+
+  // ── 6. 單句分析 ────────────────────────────────
+  function analyzeSentence(sentence) {
+    return {
+      sentence,
+      emotion:       scoreSentenceEmotion(sentence),
+      stance:        scoreSentenceStance(sentence),
+      hasVague:      includesAny(sentence, vagueSources),
+      hasConclusion: includesAny(sentence, conclusionWords),
+      hasExtreme:    includesAny(sentence, extremeWords),
+      hasUrgency:    includesAny(sentence, urgencyWords),
+      hasCounter:    includesAny(sentence, counterviewWords),
+    };
+  }
+
+  // ── 7. 全文聚合指標 ────────────────────────────
+  function aggregateAnalysis(sentences) {
+    const n = sentences.length || 1;
+    let totalEmotion = { 憤怒: 0, 恐懼: 0, 懷疑: 0, 正面: 0 };
+    let totalStance  = { 正面: 0, 負面: 0 };
+    let extremeCount = 0, vagueCount = 0, conclusionCount = 0;
+    let urgencyCount = 0, counterCount = 0;
+    let posSent = 0, negSent = 0;
+
+    for (const s of sentences) {
+      for (const cat of Object.keys(totalEmotion)) totalEmotion[cat] += s.emotion[cat];
+      totalStance.正面 += s.stance.正面;
+      totalStance.負面 += s.stance.負面;
+      if (s.hasExtreme)    extremeCount++;
+      if (s.hasVague)      vagueCount++;
+      if (s.hasConclusion) conclusionCount++;
+      if (s.hasUrgency)    urgencyCount++;
+      if (s.hasCounter)    counterCount++;
+      const net = s.stance.正面 - s.stance.負面;
+      if (net > 0) posSent++; else if (net < 0) negSent++;
+    }
+
+    return {
+      emotionRaw:      totalEmotion,
+      stanceRaw:       totalStance,
+      // 每句平均情緒詞分數 → 密度
+      emotionDensity:  Object.values(totalEmotion).reduce((a,b)=>a+b,0) / n,
+      extremeRatio:    extremeCount    / n,
+      vagueRatio:      vagueCount      / n,
+      conclusionRatio: conclusionCount / n,
+      urgencyRatio:    urgencyCount    / n,
+      hasDiversity:    counterCount > 0,
+      posSent, negSent, n,
+      // 立場淨值：正面句 vs 負面句比例差
+      biasNet:  (posSent - negSent) / n,
+    };
+  }
+
+  // ── 8. 風險評分 ────────────────────────────────
+  function calculateRiskScore(m) {
+    const raw =
+      m.emotionDensity  * 0.28 +
+      m.extremeRatio    * 0.22 +
+      m.vagueRatio      * 0.25 +
+      m.conclusionRatio * 0.15 +
+      m.urgencyRatio    * 0.10 +
+      (m.hasDiversity ? -0.10 : 0.10);  // 有反方扣分
+    return Math.max(0, raw);
+  }
+
+  // ── 9. 操作手法偵測（基於指標 + 原文模式）────
+  function detectTactics(text, m) {
+    const tactics = [];
+
+    // 從指標派生
+    if (m.emotionDensity > 1.2)
+      tactics.push({ name:'情緒密度過高', severity:'高',
+        desc:`每句平均情緒詞分數 ${m.emotionDensity.toFixed(1)}，密集情緒詞彙壓縮讀者理性判斷空間。` });
+
+    if (m.vagueRatio > 0.18)
+      tactics.push({ name:'模糊消息來源', severity:'高',
+        desc:`${Math.round(m.vagueRatio*100)}% 的句子含匿名或不可查證的消息來源，降低資訊可信度。` });
+
+    if (m.conclusionRatio > 0.15)
+      tactics.push({ name:'跳躍性結論', severity:'中',
+        desc:`${Math.round(m.conclusionRatio*100)}% 的句子使用「因此、顯然、可見」等詞強行推導結論。` });
+
+    if (m.extremeRatio > 0.20)
+      tactics.push({ name:'極端化表述', severity:'中',
+        desc:`${Math.round(m.extremeRatio*100)}% 的句子含絕對化用詞（「一定」「絕對」「完全」），簡化複雜問題。` });
+
+    if (!m.hasDiversity && m.n >= 4)
+      tactics.push({ name:'單一敘事視角', severity:'中',
+        desc:'全文未出現任何反方觀點或轉折詞，屬單方面敘事，缺乏多元聲音。' });
+
+    if (m.urgencyRatio > 0)
+      tactics.push({ name:'緊急框架操作', severity:'高',
+        desc:'使用緊急性詞彙（「緊急擴散」「必看」「震驚」），製造時間壓力抑制讀者查證。' });
+
+    // 從原文模式派生
+    if (/[！!]{1,}/.test(text.slice(0,50)) || /【.{2,8}】/.test(text.slice(0,30)))
+      tactics.push({ name:'標題帶結論', severity:'高',
+        desc:'標題使用強烈斷言或感嘆號，在讀者閱讀正文前預設情緒框架。' });
+
+    if (/反觀|相比之下|相較於/.test(text) && m.biasNet < -0.2)
+      tactics.push({ name:'比較框架偏誤', severity:'低',
+        desc:'透過選擇性對比，強化對批評對象的負面觀感，忽略比較條件的差異。' });
+
+    // 去重、限制5個
+    const seen = new Set();
+    return tactics.filter(t => !seen.has(t.name) && seen.add(t.name)).slice(0, 5);
+  }
+
+  // ── 10. 正規化情緒分數 → 0-100 ────────────────
+  function normalizeEmotions(raw, textLen) {
+    // 基礎：每200字為一個參考單位
+    const unit = Math.max(textLen / 200, 1);
+    const cap  = score => Math.min(100, Math.round(score / unit * 12));
+    const emotions = {
+      恐懼: cap(raw.恐懼),
+      憤怒: cap(raw.憤怒),
+      懷疑: cap(raw.懷疑),
+      正面: cap(raw.正面),
+      中立: 0,
+    };
+    const hotSum = emotions.恐懼 + emotions.憤怒 + emotions.懷疑;
+    emotions.中立 = Math.max(0, Math.min(100, 85 - Math.round(hotSum / 3)));
+    return emotions;
+  }
+
+  // ── 11. 主入口 analyzeLocal ────────────────────
+  function analyzeLocal(text) {
+    const sentences    = splitSentences(text);
+    const analyzed     = sentences.map(analyzeSentence);
+    const metrics      = aggregateAnalysis(analyzed);
+    const riskRaw      = calculateRiskScore(metrics);
+    const tactics      = detectTactics(text, metrics);
+    const emotions     = normalizeEmotions(metrics.emotionRaw, text.length);
+
+    // 立場偏向 -100 ~ +100（從句子級立場聚合）
+    const stanceTotal  = metrics.stanceRaw.正面 + metrics.stanceRaw.負面 || 1;
+    const bias_score   = Math.max(-100, Math.min(100,
+      Math.round(((metrics.stanceRaw.正面 - metrics.stanceRaw.負面) / stanceTotal) * 100)
+    ));
+
+    const bias_label =
+      bias_score <= -60 ? '強烈負面報導，批判立場鮮明' :
+      bias_score <= -20 ? '偏向負面，對報導對象持批評態度' :
+      bias_score <=  20 ? '立場相對中立，正負詞彙分布均衡' :
+      bias_score <=  60 ? '偏向正面，對報導對象持肯定態度' :
+                          '強烈正面報導，擁護立場鮮明';
+
+    // 操控指數：風險原始分換算 + 手法加權
+    const sevWeight = { '高': 22, '中': 13, '低': 7 };
+    const tacticBonus = tactics.reduce((s,t) => s + (sevWeight[t.severity]||0), 0);
+    const manipulation_index = Math.min(100,
+      Math.round(riskRaw * 55 + tacticBonus * 0.55)
+    );
+    const risk_level =
+      manipulation_index >= 60 ? '高' :
+      manipulation_index >= 30 ? '中' : '低';
+
+    // 結論文字
+    const topEmotion = Object.entries(emotions)
+      .filter(([k]) => k !== '中立')
+      .sort((a,b) => b[1]-a[1])[0]?.[0] || '中立';
+    const riskDesc = {
+      '高':'存在明顯資訊操控風險','中':'有一定操控傾向','低':'操控風險較低'
+    }[risk_level];
+
+    const verdict =
+      `【本機 v2 分析】本文${riskDesc}，操控指數 ${manipulation_index}（滿分100）。` +
+      `共分析 ${sentences.length} 個句子，情緒密度 ${metrics.emotionDensity.toFixed(2)}，` +
+      `極端詞佔比 ${Math.round(metrics.extremeRatio*100)}%，` +
+      `模糊來源佔比 ${Math.round(metrics.vagueRatio*100)}%。` +
+      `主導情緒：「${topEmotion}」（${emotions[topEmotion]}%），立場${bias_label}。` +
+      (tactics.length
+        ? `偵測到 ${tactics.length} 項操作手法：${tactics.map(t=>t.name).join('、')}。`
+        : '未偵測到明顯操作手法。') +
+      `（本機規則引擎，準確度低於 AI 模式）`;
+
+    return { emotions, bias_score, bias_label, tactics, manipulation_index, risk_level, verdict };
+  }
+
+  /* ════════════════════════════════════
+     分析主流程
+  ════════════════════════════════════ */
+  async function analyze() {
+    const text = textarea.value.trim();
+    if (!text) { showError('請先輸入新聞文章內容。'); return; }
+    if (text.length < 30) { showError('文章太短，請輸入至少 30 個字的內容。'); return; }
+
+    document.getElementById('results').classList.remove('visible');
+    document.getElementById('errorMsg').classList.remove('visible');
+    document.querySelector('.restore-chip')?.remove();
+    document.querySelector('.local-mode-badge')?.remove();
+    document.getElementById('loadingBar').classList.add('active');
+    document.getElementById('analyzeBtn').disabled = true;
+    setProgress(5, '初始化分析引擎...');
+
+    const steps = [
+      [15, '切分句子結構...'],
+      [32, '情緒詞加權評分（含否定/強度）...'],
+      [52, '立場句子級分析...'],
+      [68, '聚合指標：密度 / 極端 / 模糊來源...'],
+      [82, '偵測操作手法...'],
+      [94, '換算操控指數與風險等級...'],
+    ];
+    let si = 0;
+    const stepTimer = setInterval(() => {
+      if (si < steps.length) { setProgress(...steps[si]); si++; }
+    }, 400);
+
+    try {
+      let parsed;
+
+      if (currentMode === 'local') {
+        // ── 本機模式：純規則分析 ──
+        await new Promise(r => setTimeout(r, 1200)); // 模擬思考感
+        parsed = analyzeLocal(text);
+
+        // 在 result-header 加本機模式標記
+        clearInterval(stepTimer);
+        setProgress(100, '本機分析完成！');
+        const badge = document.createElement('div');
+        badge.className = 'local-mode-badge';
+        badge.textContent = '⬡ 本機規則模式';
+        document.querySelector('.result-header').appendChild(badge);
+
+      } else {
+        // ── AI 模式：Anthropic API ──
+        const apiKey = localStorage.getItem(AK_KEY) || '';
+        if (!apiKey) {
+          clearInterval(stepTimer);
+          showError('請先在上方輸入並儲存 Anthropic API Key。');
+          return;
+        }
+
+        const prompt = `你是一位媒體素養分析專家。請對以下新聞文章進行「風向分析」。
+
+分析面向：
+1. 情緒強度（百分比，各情緒加總不需等於100，每項獨立評分）：恐懼、憤怒、懷疑、中立、正面
+2. 立場傾向：評估文章整體偏向（-100 到 +100，-100為極度負面/批判，+100為極度正面/擁護，0為中立）
+3. 立場描述：一句話描述立場傾向
+4. 操作手法：找出文章中使用的資訊操控手法（0到5個），每個手法包含名稱、說明、嚴重程度（高/中/低）
+5. 操控指數：整體操控風險分數（0-100）
+6. 風險等級：高/中/低
+7. 結論：150字以內的分析結論，用繁體中文
+
+請以以下 JSON 格式回應（不要包含任何其他文字、不要用markdown代碼塊）：
+{"emotions":{"恐懼":0,"憤怒":0,"懷疑":0,"中立":0,"正面":0},"bias_score":0,"bias_label":"...","tactics":[{"name":"...","desc":"...","severity":"高|中|低"}],"manipulation_index":0,"risk_level":"高|中|低","verdict":"..."}
+
+新聞文章：
+${text}`;
+
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.error?.message || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        clearInterval(stepTimer);
+        setProgress(100, 'AI 分析完成！');
+
+        let raw = data.content.map(b => b.text || '').join('');
+        raw = raw.replace(/```json|```/g, '').trim();
+        parsed = JSON.parse(raw);
+      }
+
+      addRecord(parsed, text);
+      renderResults(parsed);
+
+    } catch (e) {
+      clearInterval(stepTimer);
+      const hint = currentMode === 'ai'
+        ? '請確認 API Key 正確，或切換至本機模式。'
+        : '請稍後再試。';
+      showError('分析失敗：' + e.message + '。' + hint);
+    } finally {
+      document.getElementById('loadingBar').classList.remove('active');
+      document.getElementById('analyzeBtn').disabled = false;
+    }
+  }
+
+  /* ════════════════════════════════════
+     情緒語言標註引擎（本機模式）
+  ════════════════════════════════════ */
+  const HIGHLIGHT_DICT = {
+    // 類別：{ cls, tip, words[] }
+    sarcasm: {
+      cls: 'hl-sarcasm',
+      tip: '嘲諷語氣',
+      words: [
+        '竟然','居然','所謂','自稱','號稱','說得好聽','口口聲聲',
+        '豈不是','不是嗎','你說說看','如願以償','師父','信徒',
+        '開釋','難道','還好意思','笑到合不攏嘴','可以去死一死',
+        '姑且不論','欸','望你','哈','說穿了','假惺惺','裝','噁',
+      ],
+    },
+    emotional: {
+      cls: 'hl-emotional',
+      tip: '情緒語言',
+      words: [
+        '恐慌','崩潰','噩夢','災難','浩劫','毀滅','滅亡','完蛋',
+        '憤慨','痛罵','狠批','炮轟','強烈','聲討','嚴斥','忍無可忍',
+        '可恥','無恥','可惡','骯髒','腐敗','腐爛','爛透','廢物',
+        '怒','批','嗆','賤','賤人','可悲','悲哀','慘','惶恐',
+        '氣急敗壞','一塌糊塗','黑手','陰謀','勾結','貪污','出賣',
+      ],
+    },
+    incite: {
+      cls: 'hl-incite',
+      tip: '煽動詞彙',
+      words: [
+        '緊急擴散','快分享','趕快','必看','震驚','爆炸性','大家快',
+        '不離不棄','必須覺醒','早日清醒','望信徒','賴給','賴清德',
+        '把…換成','全部賴','中國公民','國台辦安插',
+      ],
+    },
+    absolute: {
+      cls: 'hl-absolute',
+      tip: '主觀斷言',
+      words: [
+        '根本就是','顯然','明顯','絕對','只有','一定是','必然',
+        '永遠是對的','永遠不會錯','不可能有錯','任何一個公民都',
+        '只有信徒','不是嗎','全部','所有','完全無視','可以移送一萬次',
+        '如願以償','都違反','不會屈服',
+      ],
+    },
+  };
+
+  function buildHighlightHTML(text) {
+    // Escape HTML first
+    let safe = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Build flat list sorted longest-first to avoid partial overlap
+    const allTerms = [];
+    for (const [cat, cfg] of Object.entries(HIGHLIGHT_DICT)) {
+      for (const w of cfg.words) {
+        allTerms.push({ word: w, cls: cfg.cls, tip: cfg.tip, cat });
+      }
+    }
+    allTerms.sort((a, b) => b.word.length - a.word.length);
+
+    // Replace with placeholder tokens to avoid double-matching
+    const placeholders = [];
+    for (const { word, cls, tip } of allTerms) {
+      const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(escaped, 'g');
+      safe = safe.replace(re, (match) => {
+        const idx = placeholders.length;
+        placeholders.push(`<mark class="${cls}" data-tip="${tip}">${escHtml(match)}</mark>`);
+        return `\x00${idx}\x00`;
+      });
+    }
+
+    // Restore placeholders
+    safe = safe.replace(/\x00(\d+)\x00/g, (_, i) => placeholders[+i]);
+
+    // Convert newlines to <br>
+    safe = safe.replace(/\n/g, '<br>');
+    return safe;
+  }
+
+  function countHighlights(text) {
+    const counts = { sarcasm: 0, emotional: 0, incite: 0, absolute: 0 };
+    for (const [cat, cfg] of Object.entries(HIGHLIGHT_DICT)) {
+      for (const w of cfg.words) {
+        let idx = 0;
+        while ((idx = text.indexOf(w, idx)) !== -1) {
+          counts[cat]++;
+          idx += w.length;
+        }
+      }
+    }
+    return counts;
+  }
+
+  function runHighlightAnnotator(text) {
+    const html    = buildHighlightHTML(text);
+    const counts  = countHighlights(text);
+    const total   = Object.values(counts).reduce((a, b) => a + b, 0);
+
+    document.getElementById('highlightArticle').innerHTML = html;
+
+    const cats = [
+      { key: 'sarcasm',   label: '嘲諷語氣', cls: 'hs-sarcasm' },
+      { key: 'emotional', label: '情緒語言', cls: 'hs-emotional' },
+      { key: 'incite',    label: '煽動詞彙', cls: 'hs-incite' },
+      { key: 'absolute',  label: '主觀斷言', cls: 'hs-absolute' },
+    ];
+
+    document.getElementById('highlightStats').innerHTML =
+      cats.map(c => `
+        <div class="hstat-chip ${c.cls}">
+          <span class="hstat-num">${counts[c.key]}</span>
+          <span class="hstat-label">${c.label}</span>
+        </div>`).join('') +
+      `<div class="hstat-chip" style="margin-left:auto;">
+        <span class="hstat-num" style="color:var(--text)">${total}</span>
+        <span class="hstat-label">總計標記</span>
+      </div>`;
+
+    document.getElementById('highlightSection').classList.add('visible');
+  }
+
+  /* ════════════════════════════════════
+     冷靜反駁文生成
+  ════════════════════════════════════ */
+  const REBUTTAL_PROMPT = `請你閱讀以下文章，並完成以下任務：
+
+1️⃣ 先區分文章中「可驗證的事實」與「作者的觀點或詮釋」，但不要逐條列出，只作為寫作基礎。
+2️⃣ 在不否定作者個人經驗、也不質疑其動機的前提下，寫一篇反駁版本文章。
+3️⃣ 反駁重點放在：
+   - 文章中「從事實跳到結論」的地方
+   - 被省略的制度脈絡或其他合理解釋
+   - 比喻或修辭可能造成的過度簡化
+4️⃣ 文章語氣需冷靜、理性、可公開發表，避免嘲諷與情緒性語言。
+5️⃣ 目標不是證明作者錯誤，而是讓讀者看到：同一組事實，可以有不只一種合理詮釋。
+6️⃣ 請將內容精簡到400字數以內
+
+請直接輸出完整文章，不要解釋你的分析過程。
+
+【原文如下】：
+`;
+
+  let rebuttalText = '';
+
+  async function generateRebuttal() {
+    const text = document.getElementById('newsInput').value.trim();
+    if (!text) { showToast('⚠ 請先輸入文章並完成分析'); return; }
+
+    // Local mode → run highlight annotator instead
+    if (currentMode === 'local') {
+      document.getElementById('rebuttalLocalMsg').classList.add('visible');
+      document.getElementById('rebuttalBody').classList.remove('visible');
+      document.getElementById('btnCopyRebuttal').classList.remove('visible');
+      document.getElementById('highlightSection').classList.remove('visible');
+      // small delay so user sees the section appear
+      setTimeout(() => runHighlightAnnotator(text), 80);
+      return;
+    }
+
+    const apiKey = localStorage.getItem(AK_KEY) || '';
+    if (!apiKey) {
+      showToast('⚠ 請先儲存 API Key');
+      setMode('ai');
+      return;
+    }
+
+    // Reset state
+    rebuttalText = '';
+    document.getElementById('rebuttalLocalMsg').classList.remove('visible');
+    document.getElementById('rebuttalBody').classList.remove('visible');
+    document.getElementById('btnCopyRebuttal').classList.remove('visible');
+    document.getElementById('rebuttalLoading').classList.add('active');
+    document.getElementById('btnRebuttal').disabled = true;
+
+    const loadingSteps = [
+      '⬡ 正在分析文章結構...',
+      '⬡ 區分事實與詮釋...',
+      '⬡ 找出論證跳躍點...',
+      '⬡ 生成冷靜反駁文...',
+    ];
+    let lsi = 0;
+    const lTimer = setInterval(() => {
+      lsi = (lsi + 1) % loadingSteps.length;
+      document.getElementById('rebuttalLoadingText').textContent = loadingSteps[lsi];
+    }, 1800);
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1200,
+          messages: [{ role: 'user', content: REBUTTAL_PROMPT + text }]
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      rebuttalText = data.content.map(b => b.text || '').join('').trim();
+
+      clearInterval(lTimer);
+
+      // Render output
+      document.getElementById('rebuttalOutput').textContent = rebuttalText;
+      const charCount = rebuttalText.length;
+      document.getElementById('rebuttalMetaLeft').innerHTML =
+        `字數：${charCount} 字<br>模型：claude-sonnet-4 · ${new Date().toLocaleString('zh-TW', { hour12: false })}`;
+
+      document.getElementById('rebuttalBody').classList.add('visible');
+      document.getElementById('btnCopyRebuttal').classList.add('visible');
+      document.getElementById('rebuttalBody').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    } catch (e) {
+      clearInterval(lTimer);
+      showToast('⚠ 反駁文生成失敗：' + e.message);
+    } finally {
+      document.getElementById('rebuttalLoading').classList.remove('active');
+      document.getElementById('btnRebuttal').disabled = false;
+    }
+  }
+
+  function copyRebuttal() {
+    if (!rebuttalText) return;
+    navigator.clipboard.writeText(rebuttalText).then(() => {
+      showToast('✓ 已複製反駁文');
+      const btn = document.getElementById('btnCopyRebuttal');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已複製';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    }).catch(() => {
+      // fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = rebuttalText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('✓ 已複製反駁文');
+    });
+  }
+
+  /* ════════════════════════════════════
+     渲染結果（支援還原模式）
+  ════════════════════════════════════ */
+  function renderResults(d, overrideTimestamp) {
+    // Timestamp
+    document.getElementById('timestamp').textContent =
+      overrideTimestamp || new Date().toLocaleString('zh-TW', { hour12: false });
+
+    // Risk badge
+    const rb = document.getElementById('riskBadge');
+    rb.textContent = { '高': '⚠ 高風險', '中': '◈ 中風險', '低': '✓ 低風險' }[d.risk_level] || '—';
+    rb.className = 'risk-badge ' + ({ '高': 'risk-high', '中': 'risk-medium', '低': 'risk-low' }[d.risk_level] || '');
+
+    // Score
+    const mi = d.manipulation_index || 0;
+    document.getElementById('scoreNum').textContent = mi;
+    document.getElementById('scoreNum').style.color =
+      mi >= 70 ? 'var(--red)' : mi >= 40 ? 'var(--amber)' : 'var(--green)';
+    document.getElementById('scoreVerdict').textContent =
+      mi >= 70 ? '高度疑似帶風向，請謹慎判讀' :
+      mi >= 40 ? '存在部分操控手法，需保持批判思考' :
+                 '操控風險較低，但仍建議多方查證';
+
+    // Emotions
+    const emotions = d.emotions || {};
+    const barClass = { '恐懼':'bar-fear','憤怒':'bar-anger','懷疑':'bar-doubt','中立':'bar-neutral','正面':'bar-positive' };
+    const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
+    document.getElementById('emotionBars').innerHTML = sorted.map(([name, pct]) => `
+      <div class="emotion-item">
+        <div class="emotion-row">
+          <span class="emotion-name">${name}</span>
+          <span class="emotion-pct">${pct}%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill ${barClass[name] || 'bar-neutral'}" data-pct="${pct}"></div>
+        </div>
+      </div>`).join('');
+
+    // Bias meter
+    const bs = d.bias_score || 0;
+    const isLeft   = bs < 0;
+    const leftPct  = isLeft ? Math.min(Math.abs(bs) / 2, 50) : 0;
+    const rightPct = !isLeft ? Math.min(bs / 2, 50) : 0;
+    document.getElementById('biasMeter').innerHTML = `
+      <div class="bias-label-row">
+        <span>負面 / 批判</span><span>中立</span><span>正面 / 擁護</span>
+      </div>
+      <div class="bias-track">
+        <div class="bias-center"></div>
+        <div class="bias-fill" style="
+          background:${isLeft ? 'var(--red)' : 'var(--green)'};
+          left:${isLeft ? (50 - leftPct) + '%' : '50%'};
+          width:${isLeft ? leftPct : rightPct}%;
+          opacity:0.6;
+        "></div>
+      </div>
+      <div class="bias-verdict">${d.bias_label || '—'}</div>`;
+
+    // Tactics
+    const tactics = d.tactics || [];
+    document.getElementById('tacticsList').innerHTML = tactics.length === 0
+      ? '<div style="font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--text-dim);padding:8px 0;">✓ 未偵測到明顯操作手法</div>'
+      : tactics.map(t => `
+        <div class="tactic-item">
+          <div class="tactic-icon">${t.severity === '高' ? '🔴' : t.severity === '中' ? '🟡' : '⚪'}</div>
+          <div class="tactic-body">
+            <div class="tactic-name">${t.name}</div>
+            <div class="tactic-desc">${t.desc}</div>
+          </div>
+          <div class="tactic-severity sev-${t.severity === '高' ? 'high' : t.severity === '中' ? 'medium' : 'low'}">${t.severity}</div>
+        </div>`).join('');
+
+    // Verdict
+    document.getElementById('summaryText').innerHTML = d.verdict || '—';
+
+    // Show results
+    document.getElementById('results').classList.add('visible');
+
+    // Show rebuttal section & reset previous output
+    rebuttalText = '';
+    document.getElementById('rebuttalSection').classList.add('visible');
+    document.getElementById('rebuttalBody').classList.remove('visible');
+    document.getElementById('rebuttalLoading').classList.remove('active');
+    document.getElementById('rebuttalLocalMsg').classList.remove('visible');
+    document.getElementById('btnCopyRebuttal').classList.remove('visible');
+    document.getElementById('highlightSection').classList.remove('visible');
+    document.getElementById('highlightArticle').innerHTML = '';
+
+    // Animate bars
+    setTimeout(() => {
+      document.querySelectorAll('.bar-fill[data-pct]').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    }, 100);
+  }
+
+  /* ── 頁面載入時渲染歷史記錄 ── */
+  setMode(currentMode);   // 套用上次選擇的模式
+  renderHistory();
+  updateRadarSectionVisibility();
+  renderPickerUI();
+</script>
+</body>
+</html>
