@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SOL CAFE — Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --bg: #0c0c0e;
+  --surface: #141418;
+  --card: #1a1a20;
+  --card2: #1f1f28;
+  --border: rgba(255,255,255,0.07);
+  --pink: #ff2d78;
+  --mint: #00e5a0;
+  --yellow: #ffe03d;
+  --purple: #b47aff;
+  --white: #f5f0ff;
+  --muted: #6b6b80;
+  --muted2: #9090a8;
+  --tab-h: 62px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Noto Sans TC', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: calc(var(--tab-h) + var(--safe-bottom) + 10px);
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  padding: 36px 20px 28px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #0c0c0e 0%, #14101e 60%, #0c0c0e 100%);
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(255,45,120,0.18) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: -40px;
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(0,229,160,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.hero-title {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #ffffff 0%, #ff2d78 50%, #b47aff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.hero-sub {
+  font-size: 11px;
+  color: var(--muted2);
+  letter-spacing: 0.12em;
+  font-weight: 300;
+}
+
+.hero-badges {
+  display: flex;
+  gap: 6px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid;
+}
+.hero-badge.pink { background: rgba(255,45,120,.12); border-color: rgba(255,45,120,.4); color: var(--pink); }
+.hero-badge.mint { background: rgba(0,229,160,.1); border-color: rgba(0,229,160,.35); color: var(--mint); }
+.hero-badge.yellow { background: rgba(255,224,61,.1); border-color: rgba(255,224,61,.35); color: var(--yellow); }
+
+/* ── QR BUTTON ── */
+.qr-btn {
+  position: absolute;
+  top: 36px; right: 20px;
+  width: 46px; height: 46px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: border-color .2s, transform .15s;
+  gap: 2px;
+  z-index: 10;
+}
+.qr-btn:active { transform: scale(0.93); }
+.qr-btn:hover { border-color: rgba(255,45,120,.5); }
+.qr-btn svg { width: 20px; height: 20px; }
+.qr-btn span { font-size: 8px; color: var(--muted2); letter-spacing: 0.05em; font-weight: 600; }
+
+/* ── PROMO STRIP ── */
+.promo-strip {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 0 16px 16px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.promo-strip::-webkit-scrollbar { display: none; }
+
+.promo-card {
+  flex-shrink: 0;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 12px 14px;
+  min-width: 160px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.promo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.promo-card.p1::before { background: linear-gradient(90deg, var(--pink), var(--purple)); }
+.promo-card.p2::before { background: linear-gradient(90deg, var(--mint), #00b4d8); }
+.promo-card.p3::before { background: linear-gradient(90deg, var(--yellow), #ff9f1c); }
+.promo-card.p4::before { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+
+.promo-tag2 {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.p1 .promo-tag2 { color: var(--pink); }
+.p2 .promo-tag2 { color: var(--mint); }
+.p3 .promo-tag2 { color: var(--yellow); }
+.p4 .promo-tag2 { color: var(--purple); }
+
+.promo-desc {
+  font-size: 10px;
+  color: var(--muted2);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* ── BOTTOM TABS ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: calc(var(--tab-h) + var(--safe-bottom));
+  background: rgba(14,14,18,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  z-index: 500;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 6px;
+  padding-bottom: var(--safe-bottom);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.bottom-nav::-webkit-scrollbar { display: none; }
+
+.nav-tabs {
+  display: flex;
+  min-width: max-content;
+  padding: 0 10px;
+  gap: 2px;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background .2s;
+  min-width: 52px;
+}
+.nav-tab:active { transform: scale(0.9); }
+.nav-tab .icon { font-size: 20px; line-height: 1; }
+.nav-tab .label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  text-transform: uppercase;
+  transition: color .2s;
+}
+.nav-tab.active .label { color: var(--pink); }
+.nav-tab .dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--pink);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.nav-tab.active .dot { opacity: 1; }
+
+/* ── SECTIONS ── */
+.section { display: none; animation: fadeUp .25s ease forwards; }
+.section.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SECTION HEADING ── */
+.sec-head {
+  padding: 22px 20px 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.sec-title {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.sec-title .ko {
+  display: block;
+  font-size: 11px;
+  color: var(--muted2);
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  margin-top: 3px;
+}
+.sec-count {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 3px 10px;
+  background: var(--card);
+  border-radius: 100px;
+  border: 1px solid var(--border);
+}
+
+/* ── SUB CATEGORY ── */
+.sub-cat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+.sub-cat::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── ITEM CARDS ── */
+.items { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+
+.item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .15s;
+}
+.item:active { transform: scale(0.985); }
+.item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10%; bottom: 10%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--pink);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.item:hover { border-color: rgba(255,45,120,.25); }
+.item:hover::before { opacity: 1; }
+
+.item-body { flex: 1; min-width: 0; }
+
+.item-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 3px; }
+
+.item-zh {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.3;
+}
+.item-en {
+  font-size: 10px;
+  color: var(--muted2);
+  line-height: 1.5;
+  font-weight: 300;
+  margin-top: 2px;
+}
+.item-sub {
+  font-size: 9.5px;
+  color: var(--muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 100px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+.badge-veg { background: rgba(0,229,160,.12); color: var(--mint); border: 1px solid rgba(0,229,160,.3); }
+.badge-new { background: rgba(255,45,120,.12); color: var(--pink); border: 1px solid rgba(255,45,120,.3); }
+.badge-hot { background: rgba(255,159,28,.12); color: #ff9f1c; border: 1px solid rgba(255,159,28,.3); }
+.badge-best { background: rgba(180,122,255,.12); color: var(--purple); border: 1px solid rgba(180,122,255,.3); }
+
+.item-price {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 20px;
+  color: var(--white);
+  white-space: nowrap;
+  text-align: right;
+  line-height: 1.1;
+  padding-top: 1px;
+}
+.item-price small {
+  display: block;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 9px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  margin-top: 1px;
+  line-height: 1.4;
+}
+
+/* ── BEER GRID ── */
+.beer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 16px;
+  margin-bottom: 8px;
+}
+.beer-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 12px;
+  transition: border-color .2s;
+  position: relative;
+  overflow: hidden;
+}
+.beer-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,45,120,0.06), transparent 70%);
+  pointer-events: none;
+}
+.beer-card:hover { border-color: rgba(255,45,120,.25); }
+.bc-name { font-size: 12px; font-weight: 700; line-height: 1.3; color: var(--white); }
+.bc-en { font-size: 9px; color: var(--muted2); margin-top: 2px; line-height: 1.4; }
+.bc-origin {
+  font-size: 9px;
+  color: var(--mint);
+  margin-top: 5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.bc-price {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 15px;
+  color: var(--white);
+  margin-top: 8px;
+}
+.bc-price small {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 10px;
+  color: var(--muted2);
+  font-weight: 400;
+}
+
+/* ── HIGHBALL BOX ── */
+.hb-box {
+  margin: 0 16px 14px;
+  background: linear-gradient(135deg, rgba(255,45,120,.08) 0%, rgba(180,122,255,.08) 100%);
+  border: 1px solid rgba(255,45,120,.25);
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.hb-box::before {
+  content: '買2送1';
+  position: absolute;
+  top: 12px; right: 12px;
+  background: var(--pink);
+  color: white;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+}
+.hb-title {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 18px;
+  color: var(--pink);
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+}
+.hb-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hb-col-head { font-size: 10px; color: var(--muted2); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.hb-opt {
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.hb-opt:last-child { border-bottom: none; }
+.hb-opt .zh { font-size: 12px; font-weight: 600; }
+.hb-opt .en { font-size: 9px; color: var(--muted); }
+
+/* ── WINE ── */
+.wine-header {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  padding: 14px 20px 8px;
+}
+.wine-header.w { color: #d4c89a; }
+.wine-header.r { color: #ff6b6b; }
+.wine-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+.wine-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+.wc-brand { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; color: var(--yellow); text-transform: uppercase; }
+.wc-name { font-size: 13px; font-weight: 700; margin-top: 3px; }
+.wc-var { font-size: 9px; color: var(--muted2); font-style: italic; margin-top: 2px; }
+.wc-origin { font-size: 9px; color: var(--muted); margin-top: 3px; }
+.wc-price { font-family: 'Black Han Sans', sans-serif; font-size: 15px; margin-top: 8px; color: var(--white); }
+.wc-price small { font-family: 'Noto Sans TC', sans-serif; font-size: 9px; color: var(--muted); font-weight: 400; }
+
+/* ── PAELLA NOTE ── */
+.paella-note {
+  margin: 0 16px 12px;
+  padding: 10px 14px;
+  background: rgba(255,224,61,.06);
+  border: 1px solid rgba(255,224,61,.2);
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--yellow);
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+/* ── QR MODAL ── */
+.qr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.qr-modal.open { display: flex; }
+
+.qr-sheet {
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px 40px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  animation: slideUp .3s cubic-bezier(.32,0,.67,0) forwards;
+  border: 1px solid var(--border);
+  border-bottom: none;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.qr-sheet-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 100px;
+  margin: 0 auto 20px;
+}
+
+.qr-sheet-title {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 22px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+}
+.qr-sheet-sub { font-size: 11px; color: var(--muted2); margin-bottom: 22px; }
+
+#qr-canvas {
+  display: inline-block;
+  padding: 16px;
+  background: white;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.qr-url-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--white);
+  font-size: 12px;
+  font-family: 'Noto Sans TC', sans-serif;
+  outline: none;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+  transition: border-color .2s;
+}
+.qr-url-input:focus { border-color: rgba(255,45,120,.5); }
+.qr-url-input::placeholder { color: var(--muted); }
+
+.qr-gen-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans TC', sans-serif;
+  letter-spacing: 0.08em;
+  transition: opacity .2s, transform .15s;
+  margin-bottom: 10px;
+}
+.qr-gen-btn:active { opacity: 0.85; transform: scale(0.97); }
+
+.qr-close-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Noto Sans TC', sans-serif;
+  letter-spacing: 0.06em;
+  transition: border-color .2s;
+}
+.qr-close-btn:hover { border-color: rgba(255,255,255,.2); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* ── FOOTER ── */
+.footer {
+  padding: 24px 20px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+.footer-logo {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 18px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">✦ MENU ✦</div>
+  <div class="hero-title">SOL CAFE</div>
+  <div class="hero-sub">FOOD · DRINKS · GOOD VIBES</div>
+  <div class="hero-badges">
+    <span class="hero-badge pink">🍕 PIZZA</span>
+    <span class="hero-badge mint">🍺 CRAFT BEER</span>
+    <span class="hero-badge yellow">🍹 COCKTAIL</span>
+  </div>
+  <!-- QR BUTTON -->
+  <button class="qr-btn" onclick="openQR()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#ff2d78" stroke-width="2" stroke-linecap="round">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/>
+      <rect x="14" y="14" width="3" height="3" rx=".5"/><rect x="18" y="14" width="3" height="3" rx=".5"/>
+      <rect x="14" y="18" width="3" height="3" rx=".5"/><rect x="18" y="18" width="3" height="3" rx=".5"/>
+    </svg>
+    <span>QR</span>
+  </button>
+</div>
+
+<!-- PROMO STRIP -->
+<div class="promo-strip">
+  <div class="promo-card p1">
+    <div class="promo-tag2">買1送1</div>
+    <div class="promo-desc">長島冰茶PLUS<br>贈台灣啤酒</div>
+  </div>
+  <div class="promo-card p2">
+    <div class="promo-tag2">買2送1</div>
+    <div class="promo-desc">台灣 / 星達姆<br>豪格登 啤酒</div>
+  </div>
+  <div class="promo-card p3">
+    <div class="promo-tag2">3瓶9折</div>
+    <div class="promo-desc">任選3瓶以上<br>享9折優惠</div>
+  </div>
+  <div class="promo-card p4">
+    <div class="promo-tag2">調酒</div>
+    <div class="promo-desc">Highball 買2送1<br>SHOT HAPPY HOUR</div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-sec="food" onclick="switchSec('food',this)">
+      <span class="icon">🍗</span>
+      <span class="label">FOOD</span>
+      <div class="dot"></div>
+    </button>
+    <button class="nav-tab" data-sec="pizza" onclick="switchSec('pizza',this)">
+      <span class="icon">🍕</span>
+      <span class="label">PIZZA</span>
+      <div class="dot"></div>
+    </button>
+    <button class="nav-tab" data-sec="pasta" onclick="switchSec('pasta',this)">
+      <span class="icon">🍝</span>
+      <span class="label">PASTA</span>
+      <div class="dot"></div>
+    </button>
+    <button class="nav-tab" data-sec="paella" onclick="switchSec('paella',this)">
+      <span class="icon">🥘</span>
+      <span class="label">PAELLA</span>
+      <div class="dot"></div>
+    </button>
+    <button class="nav-tab" data-sec="beer" onclick="switchSec('beer',this)">
+      <span class="icon">🍺</span>
+      <span class="label">BEER</span>
+      <div class="dot"></div>
+    </button>
+    <button class="nav-tab" data-sec="cocktail" onclick="switchSec('cocktail',this)">
+      <span class="icon">🍹</span>
+      <span class="label">COCKTAIL</span>
+      <div class="dot"></div>
+    </button>
+    <button class="nav-tab" data-sec="wine" onclick="switchSec('wine',this)">
+      <span class="icon">🍷</span>
+      <span class="label">WINE</span>
+      <div class="dot"></div>
+    </button>
+    <button class="nav-tab" data-sec="drinks" onclick="switchSec('drinks',this)">
+      <span class="icon">☕</span>
+      <span class="label">DRINKS</span>
+      <div class="dot"></div>
+    </button>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div id="main-content">
+
+<!-- ══ FOOD ══ -->
+<div class="section active" id="food">
+  <div class="sec-head">
+    <div class="sec-title">SIDE DISH<span class="ko">小食 · 前菜</span></div>
+    <span class="sec-count">16 items</span>
+  </div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">酥炸丁香魚</span><span class="badge badge-best">베스트</span></div><div class="item-en">Fried Herring</div></div><div class="item-price">200</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">脆皮雞塊</span></div><div class="item-en">Crispy Chicken Nuggets</div></div><div class="item-price">200</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">蒜香薯條</span></div><div class="item-en">Garlic French Fries</div></div><div class="item-price">200</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">鯷魚花椰菜</span></div><div class="item-en">Stir-Fried Broccoli with Anchovies</div></div><div class="item-price">200</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">德式香腸拼盤</span></div><div class="item-en">Mixed German Sausage Platter</div><div class="item-sub">原味香腸 · 煙燻脆腸 · 台灣豬</div></div><div class="item-price">220</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">紐奧良烤雞翅</span><span class="badge badge-hot">🔥 HOT</span></div><div class="item-en">New Orleans Style Chicken Wings</div></div><div class="item-price">220</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">西班牙烘蛋</span><span class="badge badge-veg">🌿 素食</span></div><div class="item-en">Tortilla de Patatas</div></div><div class="item-price">240</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">炭烤牛肉串</span></div><div class="item-en">Beef Kebab</div><div class="item-sub">美國牛 US Beef</div></div><div class="item-price">280</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">炭烤雞肉串</span></div><div class="item-en">Chicken Kebab</div></div><div class="item-price">260</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">明太子雞肉</span></div><div class="item-en">Mentaiko Sauce Chicken</div></div><div class="item-price">280</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">明太子烤櫛瓜</span></div><div class="item-en">Mentaiko Sauce Zucchini</div></div><div class="item-price">220</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">大蒜奶油蝦</span><span class="badge badge-best">베스트</span></div><div class="item-en">Garlic Butter Shrimp</div></div><div class="item-price">280</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">綜合時蔬炸物</span><span class="badge badge-veg">🌿 素食</span></div><div class="item-en">Vegetable Tempura</div><div class="item-sub">鴻菇 · 香菇 · 杏鮑菇 · 彩椒 · 櫛瓜 · 蘆筍</div></div><div class="item-price">280</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">綜合海鮮炸物</span></div><div class="item-en">Seafood Tempura</div><div class="item-sub">蝦 · 鯛魚 · 中卷</div></div><div class="item-price">300</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">蒜辣白酒蛤蠣</span><span class="badge badge-hot">🔥 HOT</span></div><div class="item-en">Spicy Garlic Clams in White Wine</div></div><div class="item-price">280</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">好吃蒜味蝦</span></div><div class="item-en">Garlic Shrimp</div></div><div class="item-price">300</div></div>
+  </div>
+
+  <div class="sub-cat">DESSERT 甜點</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">冰淇淋布朗尼</span><span class="badge badge-best">베스트</span></div><div class="item-en">Brownie with Ice Cream</div></div><div class="item-price">160</div></div>
+  </div>
+
+  <div class="sub-cat">SALAD 沙拉</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">凱薩沙拉</span></div><div class="item-en">Caesar Salad</div><div class="item-sub">雞肉 Chicken / 燻鮭魚 Smoked Salmon</div></div><div class="item-price">260</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">綜合蔬菜芝麻葉油醋沙拉</span></div><div class="item-en">Veg & Arugula Salad with Oil and Vinegar</div><div class="item-sub">芝麻葉 · 核桃 / 雞肉或燻鮭魚</div></div><div class="item-price">280</div></div>
+  </div>
+  <div class="footer"><div class="footer-logo">SOL CAFE</div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+<!-- ══ PIZZA ══ -->
+<div class="section" id="pizza">
+  <div class="sec-head">
+    <div class="sec-title">PIZZA<span class="ko">披薩</span></div>
+    <span class="sec-count">6 items</span>
+  </div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">夏威夷披薩</span></div><div class="item-en">Hawaiian Pizza</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">瑪格莉特披薩</span><span class="badge badge-veg">🌿 素食</span></div><div class="item-en">Margherita Pizza</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">墨西哥雞肉披薩</span><span class="badge badge-hot">🔥 HOT</span></div><div class="item-en">Chicken Pizza with Pickled Jalapeño</div><div class="item-sub">墨西哥辣椒 · 雞肉</div></div><div class="item-price">340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">牛肉芝麻葉披薩</span></div><div class="item-en">Beef & Arugula Pizza</div><div class="item-sub">牛肉 · 芝麻葉</div></div><div class="item-price">360</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">海鮮披薩</span><span class="badge badge-best">베스트</span></div><div class="item-en">Seafood Pizza</div><div class="item-sub">蝦 · 鯛魚 · 中卷</div></div><div class="item-price">360</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">青醬綜合菇菇披薩</span><span class="badge badge-veg">🌿 素食</span></div><div class="item-en">Pesto Forest Pizza</div><div class="item-sub">香菇 · 鴻菇 · 杏苞菇</div></div><div class="item-price">320</div></div>
+  </div>
+  <div class="footer"><div class="footer-logo">SOL CAFE</div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+<!-- ══ PASTA ══ -->
+<div class="section" id="pasta">
+  <div class="sec-head">
+    <div class="sec-title">SPAGHETTI<span class="ko">義大利麵</span></div>
+    <span class="sec-count">8 items</span>
+  </div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">培根奶油鴻菇義大利麵</span><span class="badge badge-veg">🌿 素食</span></div><div class="item-en">Creamy Bacon and Mushroom Spaghetti</div></div><div class="item-price">260</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">白酒蛤蠣義大利麵</span></div><div class="item-en">White Wine and Clams Spaghetti</div></div><div class="item-price">260</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">茄汁牛肉醬義大利麵</span></div><div class="item-en">Tomato Meat Sauce Spaghetti</div><div class="item-sub">美國牛 US Beef</div></div><div class="item-price">280</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">奶油燻鮭魚溫泉蛋義大利麵</span><span class="badge badge-best">베스트</span></div><div class="item-en">Creamy Smoked Salmon with Onsen Tamago</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">青醬松子鮮蝦義大利麵</span></div><div class="item-en">Pine Nut Shrimp Pesto Spaghetti</div></div><div class="item-price">300</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">奶油明太子雞肉麵</span></div><div class="item-en">Creamy Chicken Spaghetti with Mentaiko</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">墨西哥奶油雞肉麵</span><span class="badge badge-hot">🔥 HOT</span></div><div class="item-en">Creamy Chicken Spaghetti with Jalapeño</div><div class="item-sub">墨西哥辣椒 · 雞肉</div></div><div class="item-price">300</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">漁夫海鮮麵</span></div><div class="item-en">Tomato Seafood Spaghetti</div><div class="item-sub">番茄 · 淡菜 · 蝦 · 中卷</div></div><div class="item-price">320</div></div>
+  </div>
+  <div class="footer"><div class="footer-logo">SOL CAFE</div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+<!-- ══ PAELLA ══ -->
+<div class="section" id="paella">
+  <div class="sec-head">
+    <div class="sec-title">PAELLA<span class="ko">大鍋飯</span></div>
+  </div>
+  <div class="paella-note">🍳 份量約 2–3 人份 · For 2–3 Persons</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">綜合海鮮大鍋飯</span><span class="badge badge-best">베스트</span></div><div class="item-en">Seafood Risotto</div><div class="item-sub">蛤蠣 · 淡菜 · 蝦 · 中卷</div></div><div class="item-price">480</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">綜合菇菇大鍋飯</span><span class="badge badge-veg">🌿 素食</span></div><div class="item-en">Mushroom Paella</div><div class="item-sub">鴻菇 · 香菇 · 杏鮑菇</div></div><div class="item-price">480</div></div>
+  </div>
+  <div class="footer"><div class="footer-logo">SOL CAFE</div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+<!-- ══ BEER ══ -->
+<div class="section" id="beer">
+  <div class="sec-head">
+    <div class="sec-title">BEER<span class="ko">啤酒</span></div>
+    <span class="sec-count">21 items</span>
+  </div>
+
+  <div class="sub-cat">DRAFT & BOTTLE</div>
+  <div class="beer-grid">
+    <div class="beer-card"><div class="bc-name">ORION 生啤酒</div><div class="bc-en">Orion Draft Beer</div><div class="bc-origin">🇯🇵 Pale Lager</div><div class="bc-price">160</div></div>
+    <div class="beer-card"><div class="bc-name">台灣18天生啤酒</div><div class="bc-en">Taiwan 18 Days Draft</div><div class="bc-origin">🇹🇼 Pale Lager</div><div class="bc-price">160</div></div>
+    <div class="beer-card"><div class="bc-name">台灣金牌啤酒</div><div class="bc-en">Taiwan Beer Gold</div><div class="bc-origin">🇹🇼 Pale Lager</div><div class="bc-price"><small>1/120 · 3/320 · 6/600</small></div></div>
+    <div class="beer-card"><div class="bc-name">星達姆啤酒</div><div class="bc-en">Estrella Damm</div><div class="bc-origin">🇪🇸 Pale Lager</div><div class="bc-price"><small>1/120 · 3/320 · 6/600</small></div></div>
+    <div class="beer-card"><div class="bc-name">豪格登小麥啤酒</div><div class="bc-en">Hoegaarden White</div><div class="bc-origin">🇧🇪 Witbier</div><div class="bc-price"><small>1/120 · 3/320 · 6/600</small></div></div>
+    <div class="beer-card"><div class="bc-name">健力士醇黑生啤酒</div><div class="bc-en">Guinness Draught</div><div class="bc-origin">🇮🇪 Irish Stout</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">源流東京金啤酒</div><div class="bc-en">Far Yeast Tokyo Blonde</div><div class="bc-origin">🇯🇵 Blonde Ale</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">源流東京IPA</div><div class="bc-en">Far Yeast Tokyo IPA</div><div class="bc-origin">🇯🇵 Belgian IPA</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">源流東京白啤酒</div><div class="bc-en">Far Yeast Tokyo White</div><div class="bc-origin">🇯🇵 Saison</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">小精靈特級金啤酒</div><div class="bc-en">La Chouffe</div><div class="bc-origin">🇧🇪 Strong Pale Ale</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">奇美藍修道院啤酒</div><div class="bc-en">Chimay Blue</div><div class="bc-origin">🇧🇪 Strong Dark Ale</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">女皇爵黑啤酒</div><div class="bc-en">Duchesse De Bourgogne</div><div class="bc-origin">🇧🇪 Flanders Red</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">杜瓦三麥金啤酒</div><div class="bc-en">Duvel</div><div class="bc-origin">🇧🇪 Strong Pale Ale</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">夸克啤酒</div><div class="bc-en">Kwak</div><div class="bc-origin">🇧🇪 Strong Pale Ale</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">瑞福10修道院啤酒</div><div class="bc-en">Rochefort 10</div><div class="bc-origin">🇧🇪 Quadrupel</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">偉馬力黑修道院啤酒</div><div class="bc-en">Westmalle Dubbel</div><div class="bc-origin">🇧🇪 Dubbel</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">富樂園草莓白啤酒</div><div class="bc-en">Floris Fraise</div><div class="bc-origin">🇧🇪 Fruit Beer</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">富樂園百香果白啤酒</div><div class="bc-en">Floris Passion</div><div class="bc-origin">🇧🇪 Fruit Beer</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">廷曼斯芙蓉覆盆子</div><div class="bc-en">Timmermans Framboise</div><div class="bc-origin">🇧🇪 Lambic</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">廷曼斯櫻桃胡椒</div><div class="bc-en">Timmermans Kriek</div><div class="bc-origin">🇧🇪 Lambic</div><div class="bc-price">260</div></div>
+    <div class="beer-card"><div class="bc-name">廷曼斯荳蔻蜜桃</div><div class="bc-en">Timmermans Peche</div><div class="bc-origin">🇧🇪 Lambic</div><div class="bc-price">260</div></div>
+  </div>
+  <div class="footer"><div class="footer-logo">SOL CAFE</div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+<!-- ══ COCKTAIL ══ -->
+<div class="section" id="cocktail">
+  <div class="sec-head">
+    <div class="sec-title">COCKTAIL<span class="ko">調酒</span></div>
+  </div>
+
+  <!-- Highball -->
+  <div class="hb-box">
+    <div class="hb-title">一加一 HIGHBALL</div>
+    <div class="hb-cols">
+      <div>
+        <div class="hb-col-head">烈酒擇一</div>
+        <div class="hb-opt"><span class="zh">伏特加</span><span class="en">Vodka</span></div>
+        <div class="hb-opt"><span class="zh">龍舌蘭</span><span class="en">Tequila</span></div>
+        <div class="hb-opt"><span class="zh">琴酒</span><span class="en">Gin</span></div>
+        <div class="hb-opt"><span class="zh">蘭姆酒</span><span class="en">Rum</span></div>
+        <div class="hb-opt"><span class="zh">威士忌</span><span class="en">Whisky</span></div>
+      </div>
+      <div>
+        <div class="hb-col-head">飲料擇一</div>
+        <div class="hb-opt"><span class="zh">可樂</span><span class="en">Coke</span></div>
+        <div class="hb-opt"><span class="zh">通寧水</span><span class="en">Tonic</span></div>
+        <div class="hb-opt"><span class="zh">雪碧</span><span class="en">Sprite</span></div>
+        <div class="hb-opt"><span class="zh">蘇打水</span><span class="en">Soda</span></div>
+        <div class="hb-opt"><span class="zh">薑汁汽水</span><span class="en">Ginger Ale</span></div>
+        <div class="hb-opt"><span class="zh">柳橙汁</span><span class="en">Orange</span></div>
+        <div class="hb-opt"><span class="zh">蔓越莓汁</span><span class="en">Cranberry</span></div>
+        <div class="hb-opt"><span class="zh">鳳梨汁</span><span class="en">Pineapple</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-cat">CLASSIC</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">一加一 Highball</span></div></div><div class="item-price">300</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">柯夢波丹</span></div><div class="item-en">Cosmopolitan</div></div><div class="item-price">300</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">伏特加萊姆</span></div><div class="item-en">Vodka Lime</div></div><div class="item-price">300</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">戴克力</span></div><div class="item-en">Daiquiri</div><div class="item-sub">香蕉 / 原味 / 鳳梨</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">瑪格莉特</span></div><div class="item-en">Margarita</div><div class="item-sub">香蕉 / 原味 / 鳳梨 / 草莓</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">墨西多</span></div><div class="item-en">Mojito</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">葡萄柚墨西多</span></div><div class="item-en">Grapefruit Mojito</div></div><div class="item-price">340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">傑克雪碧君</span></div><div class="item-en">Mr. Jack Sprite</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">火雞淑女蔓蔓</span></div><div class="item-en">Lady Turkey</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">長島冰茶 Ⅰ</span></div><div class="item-en">Long Island Iced Tea I</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">長島冰茶 Ⅱ</span></div><div class="item-en">Long Island Iced Tea II</div></div><div class="item-price">340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">長島冰茶 Ⅲ</span></div><div class="item-en">Long Island Iced Tea III</div></div><div class="item-price">360</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">長島冰茶 PLUS</span><span class="badge badge-best">베스트</span></div><div class="item-en">Long Island Iced Tea PLUS</div></div><div class="item-price">480</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">長島果茶</span></div><div class="item-en">Long Island Fruit Tea</div></div><div class="item-price">380</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">愛必死</span></div><div class="item-en">Absinth in Peace</div><div class="item-sub">紅酒 / 白酒</div></div><div class="item-price">360</div></div>
+  </div>
+
+  <div class="sub-cat">SIGNATURE</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">紅寶石</span></div><div class="item-en">Ruby</div></div><div class="item-price">300</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">血鑽石</span></div><div class="item-en">Blood Diamond</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">紅心皇后</span></div><div class="item-en">Queen of Hearts</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">外木山野裸</span></div><div class="item-en">Sex on the Beach</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">拉拉山の柚惑</span></div><div class="item-en">Sex on the Bench</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">藍眼淚</span></div><div class="item-en">Blue Hawaiian</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">奇異世界</span></div><div class="item-en">Kiwi World</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">蘋果派</span></div><div class="item-en">Apple Pie</div></div><div class="item-price">340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">鳳刺的琴蘇</span></div><div class="item-en">Pineapple Love</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">金包銀</span></div><div class="item-en">Life with No Money</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">雪中紅</span></div><div class="item-en">Red in Snow</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">杏仁酸酒</span></div><div class="item-en">Amaretto Sour</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">葡萄柚酸酒</span></div><div class="item-en">Grapefruit Sour</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">薑汁酸酒</span></div><div class="item-en">Ginger Sour</div></div><div class="item-price">340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">福爾摩沙酸酒</span></div><div class="item-en">Formosa Sour</div></div><div class="item-price">320</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">島嶼果實</span></div><div class="item-en">Formosa Gains</div></div><div class="item-price">340</div></div>
+  </div>
+
+  <div class="sub-cat">SANGRIA & HOT</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">桑格莉亞</span></div><div class="item-en">Sangria</div><div class="item-sub">白酒 White / 紅酒 Red</div></div><div class="item-price"><small>I/320 H/320</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">肉桂桑格莉亞</span></div><div class="item-en">Cinnamon Sangria</div></div><div class="item-price"><small>I/340 H/340</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">夢幻仙境</span></div><div class="item-en">Fairyland</div></div><div class="item-price"><small>I/340 H/340</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">熱熱喝快快好</span></div><div class="item-en">Prescription for Cold</div></div><div class="item-price"><small>H/320</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">熱熱喝薑薑好</span></div><div class="item-en">Prescription for Cold (Ginger)</div></div><div class="item-price"><small>H/340</small></div></div>
+  </div>
+
+  <div class="sub-cat">BOMB 炸彈酒</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">深水炸彈 / 超級深水炸彈</span></div><div class="item-en">Depth Charge / Super Depth Charge</div></div><div class="item-price">300/340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">野格棒 / 野格超棒</span></div><div class="item-en">Jäger Bomb / Jäger Super Bomb</div></div><div class="item-price">300/340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">雪莉棒 / 雪莉超棒</span></div><div class="item-en">Sherry Bomb / Sherry Super Bomb</div></div><div class="item-price">300/340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">艾碧斯棒 / 艾碧斯超棒</span></div><div class="item-en">Absinth Bomb / Absinth Super Bomb</div></div><div class="item-price">300/340</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">台灣棒 / 台灣超棒</span></div><div class="item-en">Kaoliang Bomb / Kaoliang Super Bomb</div></div><div class="item-price">300/340</div></div>
+  </div>
+
+  <div class="sub-cat">SHOT HAPPY HOUR</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">龍舌蘭 Tequila</span></div></div><div class="item-price"><small>1/120 · 3/320 · 6/600</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">伏特加 Vodka</span></div></div><div class="item-price"><small>1/120 · 3/320 · 6/600</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">威士忌 Whisky</span></div></div><div class="item-price"><small>1/120 · 3/320 · 6/600</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">琴酒 Gin</span></div></div><div class="item-price"><small>1/120 · 3/320 · 6/600</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">台灣高粱 Kaoliang</span></div></div><div class="item-price"><small>1/120 · 3/320 · 6/600</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">艾碧斯有兩種</span><span class="badge badge-new">NEW</span></div><div class="item-en">Absinth 2 Much</div><div class="item-sub">艾碧斯 · 火焰艾碧斯 · 水蜜桃 · 青蘋果香甜酒</div></div><div class="item-price">900</div></div>
+  </div>
+  <div class="footer"><div class="footer-logo">SOL CAFE</div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+<!-- ══ WINE ══ -->
+<div class="section" id="wine">
+  <div class="sec-head">
+    <div class="sec-title">WINE<span class="ko">葡萄酒</span></div>
+  </div>
+  <div class="wine-header w">☁ WHITE 白酒</div>
+  <div class="wine-grid">
+    <div class="wine-card"><div class="wc-brand">TRAPICHE</div><div class="wc-name">Astica</div><div class="wc-var">Chardonnay</div><div class="wc-origin">🇦🇷 Argentina</div><div class="wc-price">G/250 <small>· B/980</small></div></div>
+    <div class="wine-card"><div class="wc-brand">FELIX SOLIS</div><div class="wc-name">Contenda</div><div class="wc-var">Sauvignon Blanc</div><div class="wc-origin">🇪🇸 Spain</div><div class="wc-price"><small>B/980</small></div></div>
+  </div>
+  <div class="wine-header r">🍷 RED 紅酒</div>
+  <div class="wine-grid">
+    <div class="wine-card"><div class="wc-brand">TRAPICHE</div><div class="wc-name">Astica</div><div class="wc-var">Cab. Sauvignon — Malbec</div><div class="wc-origin">🇦🇷 Argentina</div><div class="wc-price">G/250 <small>· B/980</small></div></div>
+    <div class="wine-card"><div class="wc-brand">KARKÚ</div><div class="wc-name">Nocturno</div><div class="wc-var">Merlot</div><div class="wc-origin">🇨🇱 Chile</div><div class="wc-price"><small>B/980</small></div></div>
+  </div>
+  <div style="padding:4px 20px 16px; font-size:11px; color:var(--muted);">G = 175ml &nbsp;·&nbsp; B = 750ml</div>
+  <div class="footer"><div class="footer-logo">SOL CAFE</div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+<!-- ══ DRINKS ══ -->
+<div class="section" id="drinks">
+  <div class="sec-head">
+    <div class="sec-title">BEVERAGE<span class="ko">飲料 · 咖啡</span></div>
+  </div>
+
+  <div class="sub-cat">茶 · Tea</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">錫蘭紅茶</span></div><div class="item-en">Ceylon Black Tea</div></div><div class="item-price"><small>I/140 H/140</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">好喝水茶</span></div><div class="item-en">Fruit Tea</div></div><div class="item-price"><small>I/180 H/180</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">好喝柚子茶</span></div><div class="item-en">Yuzu Tea</div></div><div class="item-price"><small>I/180 H/180</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">洋甘菊茶</span></div><div class="item-en">Chamomile Tea</div></div><div class="item-price"><small>H/160</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">伯爵茶</span></div><div class="item-en">Earl Grey Tea</div></div><div class="item-price"><small>H/160</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">黑糖奶茶</span></div><div class="item-en">Brown Sugar Milk Tea</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">巧克力牛奶</span></div><div class="item-en">Chocolate Milk</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+  </div>
+
+  <div class="sub-cat">果汁 · Juice</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">蜂蜜檸檬汁</span></div><div class="item-en">Honey Lemon Juice</div></div><div class="item-price">160</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">蜂蜜葡萄柚汁</span></div><div class="item-en">Honey Grapefruit Juice</div></div><div class="item-price">160</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">奇異果汁</span></div><div class="item-en">Kiwi Juice</div></div><div class="item-price">180</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">青蘋果思慕奇</span></div><div class="item-en">Green Apple Smoothie</div></div><div class="item-price">180</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">奇異果思慕奇</span></div><div class="item-en">Kiwi Smoothie</div></div><div class="item-price">180</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">草莓思慕奇</span></div><div class="item-en">Strawberry Smoothie</div></div><div class="item-price">180</div></div>
+  </div>
+
+  <div class="sub-cat">咖啡 · Coffee</div>
+  <div class="items">
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">美式咖啡</span></div><div class="item-en">Americano</div></div><div class="item-price"><small>I/140 H/140</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">原味拿鐵</span></div><div class="item-en">Caffe Latte</div></div><div class="item-price"><small>I/160 H/160</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">黑糖拿鐵</span></div><div class="item-en">Brown Sugar Caffe Latte</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">焦糖拿鐵</span></div><div class="item-en">Caramel Caffe Latte</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">巧克力摩卡</span></div><div class="item-en">Chocolate Mocha</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">貝禮詩拿鐵</span></div><div class="item-en">Baileys Caffe Latte</div></div><div class="item-price"><small>I/200 H/200</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">濃縮西西里</span></div><div class="item-en">Lemon Espresso</div></div><div class="item-price">140</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">氣泡西西里</span></div><div class="item-en">Coffee Lemonade</div></div><div class="item-price">160</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">葡萄柚西西里</span></div><div class="item-en">Grapefruit Coffee Lemonade</div></div><div class="item-price">170</div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">原味卡布奇諾</span></div><div class="item-en">Cappuccino</div></div><div class="item-price"><small>H/160</small></div></div>
+    <div class="item"><div class="item-body"><div class="item-top"><span class="item-zh">黑糖卡布奇諾</span></div><div class="item-en">Brown Sugar Cappuccino</div></div><div class="item-price"><small>H/170</small></div></div>
+  </div>
+  <div class="footer"><div class="footer-logo">SOL CAFE</div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+</div><!-- end main-content -->
+
+<!-- QR MODAL -->
+<div class="qr-modal" id="qrModal" onclick="handleModalClick(event)">
+  <div class="qr-sheet" id="qrSheet">
+    <div class="qr-sheet-handle"></div>
+    <div class="qr-sheet-title">掃碼看菜單</div>
+    <div class="qr-sheet-sub">輸入您的網址後點擊生成 QR Code</div>
+    <div id="qr-canvas"></div>
+    <input class="qr-url-input" id="qrUrlInput" type="url" placeholder="https://your-menu-url.com" value="https://solcafe.menu">
+    <button class="qr-gen-btn" onclick="generateQR()">🔗 生成 QR Code</button>
+    <button class="qr-close-btn" onclick="closeQR()">關閉</button>
+  </div>
+</div>
+
+<script>
+// ── NAV ──
+function switchSec(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── QR CODE ──
+let qrInstance = null;
+
+function openQR() {
+  document.getElementById('qrModal').classList.add('open');
+  generateQR();
+}
+function closeQR() {
+  document.getElementById('qrModal').classList.remove('open');
+}
+function handleModalClick(e) {
+  if (e.target === document.getElementById('qrModal')) closeQR();
+}
+
+function generateQR() {
+  const url = document.getElementById('qrUrlInput').value.trim() || window.location.href;
+  const container = document.getElementById('qr-canvas');
+  container.innerHTML = '';
+  try {
+    qrInstance = new QRCode(container, {
+      text: url,
+      width: 200,
+      height: 200,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    container.innerHTML = '<div style="color:#ff2d78;font-size:12px;padding:20px;">生成失敗，請確認網址格式</div>';
+  }
+}
+
+// Init QR on page load with current URL
+window.addEventListener('load', () => {
+  document.getElementById('qrUrlInput').value = window.location.href;
+});
+</script>
+</body>
+</html>
