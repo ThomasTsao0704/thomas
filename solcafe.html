@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SOL CAFE — Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --card: #1c1c1c;
+    --border: #2a2a2a;
+    --gold: #c9a84c;
+    --gold-light: #e8c96e;
+    --white: #f0ece4;
+    --muted: #888;
+    --red: #c0392b;
+    --tab-h: 52px;
+    --header-h: 72px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.18em;
+    color: var(--white);
+    line-height: 1;
+  }
+  .logo span { color: var(--gold); }
+
+  /* ─── PROMO BANNER ─── */
+  .promo-banner {
+    background: var(--gold);
+    color: #000;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+  }
+  .promo-banner .promo-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+  }
+  .promo-banner .promo-row:last-child { border-bottom: none; }
+  .promo-tag {
+    background: #000;
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── CATEGORY TABS ─── */
+  .tabs-wrapper {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 99;
+    background: var(--surface);
+    border-bottom: 2px solid var(--gold);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs-wrapper::-webkit-scrollbar { display: none; }
+  .tabs {
+    display: flex;
+    min-width: max-content;
+    padding: 0 8px;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    padding: 0 14px;
+    height: var(--tab-h);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color .2s, border-color .2s;
+  }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+  .tab-btn:hover { color: var(--white); }
+
+  /* ─── MAIN CONTENT ─── */
+  .content { padding: 0 0 80px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ─── SECTION HEADER ─── */
+  .section-header {
+    padding: 28px 16px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 34px;
+    letter-spacing: 0.15em;
+    color: var(--white);
+    line-height: 1;
+  }
+  .section-title-zh {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  /* ─── MENU ITEM ─── */
+  .item-list { padding: 0 12px; }
+  .item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    transition: border-color .2s;
+  }
+  .item:hover { border-color: var(--gold); }
+  .item-info { flex: 1; min-width: 0; }
+  .item-name-zh {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.4;
+  }
+  .item-name-en {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.5;
+    font-weight: 300;
+    letter-spacing: 0.03em;
+  }
+  .item-note {
+    font-size: 10px;
+    color: var(--gold);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+  .item-badge {
+    display: inline-block;
+    background: rgba(201,168,76,.15);
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,.3);
+    border-radius: 3px;
+    font-size: 9px;
+    padding: 1px 5px;
+    margin-left: 5px;
+    vertical-align: middle;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+  .item-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    min-width: 48px;
+    text-align: right;
+    padding-top: 1px;
+  }
+  .item-price small {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0;
+    display: block;
+    line-height: 1.2;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+
+  /* ─── SUBSECTION ─── */
+  .subsection-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    padding: 18px 16px 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+
+  /* ─── BEER SPECIAL ─── */
+  .beer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 12px;
+    margin-bottom: 10px;
+  }
+  .beer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    transition: border-color .2s;
+  }
+  .beer-card:hover { border-color: var(--gold); }
+  .beer-name-zh { font-size: 13px; font-weight: 700; line-height: 1.4; }
+  .beer-name-en { font-size: 10px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .beer-origin { font-size: 9px; color: var(--gold); margin-top: 3px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .beer-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: var(--gold);
+    margin-top: 6px;
+  }
+
+  /* ─── HIGHBALL ─── */
+  .highball-box {
+    background: var(--card);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    margin: 0 12px 16px;
+    padding: 16px;
+  }
+  .highball-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .highball-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .highball-col-title {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .highball-opt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    font-size: 12px;
+    color: var(--white);
+    border-bottom: 1px solid var(--border);
+  }
+  .highball-opt:last-child { border-bottom: none; }
+  .highball-opt .zh { font-weight: 700; }
+  .highball-opt .en { color: var(--muted); font-size: 10px; }
+
+  /* ─── WINE ─── */
+  .wine-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 12px 16px;
+  }
+  .wine-type-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.15em;
+    padding: 12px 16px 4px;
+  }
+  .wine-type-title.white { color: #d4c89a; }
+  .wine-type-title.red { color: #c0392b; }
+  .wine-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .wine-brand { font-size: 11px; color: var(--gold); font-weight: 700; letter-spacing: 0.05em; }
+  .wine-name { font-size: 13px; font-weight: 700; margin-top: 3px; }
+  .wine-varietal { font-size: 10px; color: var(--muted); margin-top: 2px; font-style: italic; }
+  .wine-origin { font-size: 9px; color: var(--muted); margin-top: 3px; letter-spacing: 0.04em; }
+  .wine-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: var(--gold);
+    margin-top: 8px;
+  }
+
+  /* ─── PAELLA SPECIAL ─── */
+  .paella-note {
+    background: rgba(201,168,76,.08);
+    border: 1px solid rgba(201,168,76,.3);
+    border-radius: 8px;
+    margin: 0 12px 12px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 30px 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .footer .logo-sm {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">SOL <span>CAFE</span></div>
+</header>
+
+<!-- PROMO BANNER -->
+<div class="promo-banner">
+  <div class="promo-row">
+    <span class="promo-tag">買1送1</span>
+    <span>買長島冰茶 PLUS 送台灣啤酒 Buy 1 Long Island Iced Tea PLUS get 1 free Taiwan Beer</span>
+  </div>
+  <div class="promo-row">
+    <span class="promo-tag">買2送1</span>
+    <span>台灣啤酒 / 星達姆啤酒 / 豪格登小麥啤酒（限$240-260品項）</span>
+  </div>
+  <div class="promo-row">
+    <span class="promo-tag">3瓶9折</span>
+    <span>啤酒任選3瓶以上享9折優惠 10% off with any 3 beers</span>
+  </div>
+  <div class="promo-row">
+    <span class="promo-tag">調酒</span>
+    <span>一加一 Highball 買2送1 · SHOT HAPPY HOUR</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrapper" id="tabsWrapper">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showSection('food','this')" data-section="food">FOOD</button>
+    <button class="tab-btn" onclick="showSection('pizza','this')" data-section="pizza">PIZZA</button>
+    <button class="tab-btn" onclick="showSection('pasta','this')" data-section="pasta">PASTA</button>
+    <button class="tab-btn" onclick="showSection('paella','this')" data-section="paella">PAELLA</button>
+    <button class="tab-btn" onclick="showSection('salad','this')" data-section="salad">SALAD</button>
+    <button class="tab-btn" onclick="showSection('beer','this')" data-section="beer">BEER</button>
+    <button class="tab-btn" onclick="showSection('cocktail','this')" data-section="cocktail">COCKTAIL</button>
+    <button class="tab-btn" onclick="showSection('wine','this')" data-section="wine">WINE</button>
+    <button class="tab-btn" onclick="showSection('beverage','this')" data-section="beverage">DRINKS</button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ══════════ FOOD ══════════ -->
+  <div class="section active" id="food">
+    <div class="section-header">
+      <div>
+        <div class="section-title">SIDE DISH</div>
+        <div class="section-title-zh">小食</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="item-list">
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">酥炸丁香魚</div>
+          <div class="item-name-en">Fried Herring</div>
+        </div>
+        <div class="item-price">200</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">脆皮雞塊</div>
+          <div class="item-name-en">Crispy Chicken Nuggets</div>
+        </div>
+        <div class="item-price">200</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">蒜香薯條</div>
+          <div class="item-name-en">Garlic French Fries</div>
+        </div>
+        <div class="item-price">200</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">鯷魚花椰菜</div>
+          <div class="item-name-en">Stir-Fried Broccoli with Anchovies</div>
+        </div>
+        <div class="item-price">200</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">德式香腸拼盤</div>
+          <div class="item-name-en">Mixed German Sausage Platter</div>
+          <div class="item-name-en">原味香腸．煙燻脆腸 · 台灣豬 Taiwan Pork</div>
+        </div>
+        <div class="item-price">220</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">紐奧良烤雞翅</div>
+          <div class="item-name-en">New Orleans Style Chicken Wings</div>
+        </div>
+        <div class="item-price">220</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">西班牙烘蛋</div>
+          <div class="item-name-en">Tortilla de Patatas</div>
+          <div class="item-note">🌿 可調整為素食 Vegetarian option available</div>
+        </div>
+        <div class="item-price">240</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">炭烤牛肉串</div>
+          <div class="item-name-en">Beef Kebab</div>
+          <div class="item-name-en">美國牛 US Beef</div>
+        </div>
+        <div class="item-price">280</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">炭烤雞肉串</div>
+          <div class="item-name-en">Chicken Kebab</div>
+        </div>
+        <div class="item-price">260</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">明太子雞肉</div>
+          <div class="item-name-en">Mentaiko Sauce Chicken</div>
+        </div>
+        <div class="item-price">280</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">明太子烤櫛瓜</div>
+          <div class="item-name-en">Mentaiko Sauce Zucchini</div>
+        </div>
+        <div class="item-price">220</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">大蒜奶油蝦</div>
+          <div class="item-name-en">Garlic Butter Shrimp</div>
+        </div>
+        <div class="item-price">280</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">綜合時蔬炸物</div>
+          <div class="item-name-en">Vegetable Tempura</div>
+          <div class="item-name-en">鴻菇．香菇．杏鮑菇．彩椒．櫛瓜．蘆筍</div>
+        </div>
+        <div class="item-price">280</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">綜合海鮮炸物</div>
+          <div class="item-name-en">Seafood Tempura</div>
+          <div class="item-name-en">蝦．鯛魚．中卷 Shrimp. Bream Fish. Calamari</div>
+        </div>
+        <div class="item-price">300</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">蒜辣白酒蛤蠣</div>
+          <div class="item-name-en">Spicy Garlic Clams in White Wine</div>
+        </div>
+        <div class="item-price">280</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">好吃蒜味蝦</div>
+          <div class="item-name-en">Garlic Shrimp</div>
+        </div>
+        <div class="item-price">300</div>
+      </div>
+
+    </div>
+
+    <!-- DESSERT -->
+    <div class="section-header" style="padding-top:28px;">
+      <div>
+        <div class="section-title">DESSERT</div>
+        <div class="section-title-zh">甜點</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="item-list">
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">冰淇淋布朗尼</div>
+          <div class="item-name-en">Brownie with Ice Cream</div>
+        </div>
+        <div class="item-price">160</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ PIZZA ══════════ -->
+  <div class="section" id="pizza">
+    <div class="section-header">
+      <div>
+        <div class="section-title">PIZZA</div>
+        <div class="section-title-zh">披薩</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="item-list">
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">夏威夷披薩</div>
+          <div class="item-name-en">Hawaiian Pizza</div>
+        </div>
+        <div class="item-price">320</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">瑪格莉特披薩</div>
+          <div class="item-name-en">Margherita Pizza</div>
+          <div class="item-note">🌿 可調整為素食 Vegetarian option available</div>
+        </div>
+        <div class="item-price">320</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">墨西哥雞肉披薩</div>
+          <div class="item-name-en">Chicken Pizza with Pickled Jalapeño</div>
+          <div class="item-name-en">墨西哥辣椒．雞肉</div>
+        </div>
+        <div class="item-price">340</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">牛肉芝麻葉披薩</div>
+          <div class="item-name-en">Beef & Arugula Pizza</div>
+          <div class="item-name-en">牛肉．芝麻葉</div>
+        </div>
+        <div class="item-price">360</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">海鮮披薩</div>
+          <div class="item-name-en">Seafood Pizza</div>
+          <div class="item-name-en">蝦．鯛魚．中卷 Shrimp. Bream Fish. Calamari</div>
+        </div>
+        <div class="item-price">360</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">青醬綜合菇菇披薩</div>
+          <div class="item-name-en">Pesto Forest Pizza</div>
+          <div class="item-name-en">香菇．鴻菇．杏苞菇</div>
+          <div class="item-note">🌿 可調整為素食 Vegetarian option available</div>
+        </div>
+        <div class="item-price">320</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════ PASTA ══════════ -->
+  <div class="section" id="pasta">
+    <div class="section-header">
+      <div>
+        <div class="section-title">SPAGHETTI</div>
+        <div class="section-title-zh">義大利麵</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="item-list">
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">培根奶油鴻菇義大利麵</div>
+          <div class="item-name-en">Creamy Bacon and Mushroom Spaghetti</div>
+          <div class="item-note">🌿 可調整為素食 Vegetarian option available</div>
+        </div>
+        <div class="item-price">260</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">白酒蛤蠣義大利麵</div>
+          <div class="item-name-en">White Wine and Clams Spaghetti</div>
+        </div>
+        <div class="item-price">260</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">茄汁牛肉醬義大利麵</div>
+          <div class="item-name-en">Tomato Meat Sauce Spaghetti</div>
+          <div class="item-name-en">美國牛 US Beef</div>
+        </div>
+        <div class="item-price">280</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">奶油燻鮭魚溫泉蛋義大利麵</div>
+          <div class="item-name-en">Creamy Smoked Salmon Spaghetti with Onsen Tamago</div>
+        </div>
+        <div class="item-price">320</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">青醬松子鮮蝦義大利麵</div>
+          <div class="item-name-en">Pine Nut Shrimp Pesto Spaghetti</div>
+        </div>
+        <div class="item-price">300</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">奶油明太子雞肉麵</div>
+          <div class="item-name-en">Creamy Chicken Spaghetti with Mentaiko</div>
+        </div>
+        <div class="item-price">320</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">墨西哥奶油雞肉麵</div>
+          <div class="item-name-en">Creamy Chicken Spaghetti with Pickled Jalapeño</div>
+          <div class="item-name-en">墨西哥辣椒．雞肉</div>
+        </div>
+        <div class="item-price">300</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">漁夫海鮮麵</div>
+          <div class="item-name-en">Tomato Seafood Spaghetti</div>
+          <div class="item-name-en">番茄．淡菜．蝦．中卷</div>
+        </div>
+        <div class="item-price">320</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════ PAELLA ══════════ -->
+  <div class="section" id="paella">
+    <div class="section-header">
+      <div>
+        <div class="section-title">PAELLA</div>
+        <div class="section-title-zh">大鍋飯</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="paella-note">份量約 2–3 人份 · For 2–3 Persons</div>
+    <div class="item-list">
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">綜合海鮮大鍋飯</div>
+          <div class="item-name-en">Seafood Risotto</div>
+          <div class="item-name-en">蛤蠣．淡菜．蝦．中卷 Clams. Mussels. Shrimp. Calamari</div>
+        </div>
+        <div class="item-price">480</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">綜合菇菇大鍋飯</div>
+          <div class="item-name-en">Mushroom Paella</div>
+          <div class="item-name-en">鴻菇．香菇．杏鮑菇 Button. Shiitake. King Oyster</div>
+          <div class="item-note">🌿 可調整為素食 Vegetarian option available</div>
+        </div>
+        <div class="item-price">480</div>
+      </div>
+
+    </div>
+
+    <!-- SALAD inside same area for easy scroll -->
+    <div class="section-header" style="padding-top:28px;">
+      <div>
+        <div class="section-title">SALAD</div>
+        <div class="section-title-zh">沙拉</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="item-list">
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">凱薩沙拉</div>
+          <div class="item-name-en">Caesar Salad</div>
+          <div class="item-note">雞肉 Chicken / 燻鮭魚 Smoked Salmon</div>
+        </div>
+        <div class="item-price">260</div>
+      </div>
+
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">綜合蔬菜芝麻葉油醋沙拉</div>
+          <div class="item-name-en">Comprehensive Veg & Arugula Salad with Oil and Vinegar</div>
+          <div class="item-name-en">芝麻葉．核桃 Arugula. Walnut</div>
+          <div class="item-note">雞肉 Chicken / 燻鮭魚 Smoked Salmon</div>
+        </div>
+        <div class="item-price">280</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════ SALAD standalone ══════════ -->
+  <div class="section" id="salad">
+    <div class="section-header">
+      <div>
+        <div class="section-title">SALAD</div>
+        <div class="section-title-zh">沙拉</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+    <div class="item-list">
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">凱薩沙拉</div>
+          <div class="item-name-en">Caesar Salad</div>
+          <div class="item-note">雞肉 Chicken / 燻鮭魚 Smoked Salmon</div>
+        </div>
+        <div class="item-price">260</div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">綜合蔬菜芝麻葉油醋沙拉</div>
+          <div class="item-name-en">Comprehensive Veg & Arugula Salad</div>
+          <div class="item-name-en">芝麻葉．核桃 / 雞肉或燻鮭魚</div>
+        </div>
+        <div class="item-price">280</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BEER ══════════ -->
+  <div class="section" id="beer">
+    <div class="section-header">
+      <div>
+        <div class="section-title">BEER</div>
+        <div class="section-title-zh">啤酒</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="beer-grid">
+
+      <div class="beer-card">
+        <div class="beer-name-zh">ORION 生啤酒</div>
+        <div class="beer-name-en">Orion Draft Beer</div>
+        <div class="beer-origin">🇯🇵 Japan · Pale Lager</div>
+        <div class="beer-price">160</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">台灣18天生啤酒</div>
+        <div class="beer-name-en">Taiwan 18 Days Draft Beer</div>
+        <div class="beer-origin">🇹🇼 Taiwan · Pale Lager</div>
+        <div class="beer-price">160</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">台灣金牌啤酒</div>
+        <div class="beer-name-en">Taiwan Beer Gold Medal</div>
+        <div class="beer-origin">🇹🇼 Taiwan · Pale Lager</div>
+        <div class="beer-price">1/120 · 3/320 · 6/600</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">星達姆啤酒</div>
+        <div class="beer-name-en">Estrella Damm Beer</div>
+        <div class="beer-origin">🇪🇸 Spain · Pale Lager</div>
+        <div class="beer-price">1/120 · 3/320 · 6/600</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">豪格登小麥啤酒</div>
+        <div class="beer-name-en">Hoegaarden White</div>
+        <div class="beer-origin">🇧🇪 Belgium · Witbier</div>
+        <div class="beer-price">1/120 · 3/320 · 6/600</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">健力士醇黑生啤酒</div>
+        <div class="beer-name-en">Guinness Draught</div>
+        <div class="beer-origin">🇮🇪 Ireland · Irish Dry Stout</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">源流東京金啤酒</div>
+        <div class="beer-name-en">Far Yeast Tokyo Blonde</div>
+        <div class="beer-origin">🇯🇵 Japan · Blonde Ale</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">源流東京印度淡愛爾</div>
+        <div class="beer-name-en">Far Yeast Tokyo IPA</div>
+        <div class="beer-origin">🇯🇵 Japan · Belgian IPA</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">源流東京白啤酒</div>
+        <div class="beer-name-en">Far Yeast Tokyo White</div>
+        <div class="beer-origin">🇯🇵 Japan · Saison</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">小精靈特級金啤酒</div>
+        <div class="beer-name-en">La Chouffe</div>
+        <div class="beer-origin">🇧🇪 Belgium · Strong Pale Ale</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">奇美藍修道院啤酒</div>
+        <div class="beer-name-en">Chimay Blue</div>
+        <div class="beer-origin">🇧🇪 Belgium · Strong Dark Ale</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">女皇爵黑啤酒</div>
+        <div class="beer-name-en">Duchesse De Bourgogne</div>
+        <div class="beer-origin">🇧🇪 Belgium · Flanders Red</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">杜瓦三麥金啤酒</div>
+        <div class="beer-name-en">Duvel</div>
+        <div class="beer-origin">🇧🇪 Belgium · Strong Pale Ale</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">夸克啤酒</div>
+        <div class="beer-name-en">Kwak</div>
+        <div class="beer-origin">🇧🇪 Belgium · Strong Pale Ale</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">瑞福10修道院啤酒</div>
+        <div class="beer-name-en">Rochefort Trappistes 10</div>
+        <div class="beer-origin">🇧🇪 Belgium · Quadrupel</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">偉馬力黑修道院啤酒</div>
+        <div class="beer-name-en">Westmalle Dubbel</div>
+        <div class="beer-origin">🇧🇪 Belgium · Dubbel</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">富樂園草莓白啤酒</div>
+        <div class="beer-name-en">Floris Fraise</div>
+        <div class="beer-origin">🇧🇪 Belgium · Fruit Beer</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">富樂園百香果白啤酒</div>
+        <div class="beer-name-en">Floris Passion</div>
+        <div class="beer-origin">🇧🇪 Belgium · Fruit Beer</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">廷曼斯芙蓉覆盆子啤酒</div>
+        <div class="beer-name-en">Timmermans Framboise Hibiscus</div>
+        <div class="beer-origin">🇧🇪 Belgium · Lambic</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">廷曼斯櫻桃胡椒啤酒</div>
+        <div class="beer-name-en">Timmermans Kriek Black Pepper</div>
+        <div class="beer-origin">🇧🇪 Belgium · Lambic</div>
+        <div class="beer-price">260</div>
+      </div>
+
+      <div class="beer-card">
+        <div class="beer-name-zh">廷曼斯荳蔻蜜桃啤酒</div>
+        <div class="beer-name-en">Timmermans Peche Cardamome</div>
+        <div class="beer-origin">🇧🇪 Belgium · Lambic</div>
+        <div class="beer-price">260</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════ COCKTAIL ══════════ -->
+  <div class="section" id="cocktail">
+    <div class="section-header">
+      <div>
+        <div class="section-title">COCKTAIL</div>
+        <div class="section-title-zh">調酒</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+
+    <!-- Highball promo box -->
+    <div class="highball-box">
+      <div class="highball-title">一加一 HIGHBALL — 買2送1</div>
+      <div class="highball-cols">
+        <div>
+          <div class="highball-col-title">烈酒擇一 1 Spirit</div>
+          <div class="highball-opt"><span class="zh">伏特加</span><span class="en">Vodka</span></div>
+          <div class="highball-opt"><span class="zh">龍舌蘭</span><span class="en">Tequila</span></div>
+          <div class="highball-opt"><span class="zh">琴酒</span><span class="en">Gin</span></div>
+          <div class="highball-opt"><span class="zh">蘭姆酒</span><span class="en">Rum</span></div>
+          <div class="highball-opt"><span class="zh">威士忌</span><span class="en">Whisky</span></div>
+        </div>
+        <div>
+          <div class="highball-col-title">飲料擇一 1 Soft Drink</div>
+          <div class="highball-opt"><span class="zh">可樂</span><span class="en">Coke</span></div>
+          <div class="highball-opt"><span class="zh">通寧水</span><span class="en">Tonic</span></div>
+          <div class="highball-opt"><span class="zh">雪碧</span><span class="en">Sprite</span></div>
+          <div class="highball-opt"><span class="zh">蘇打水</span><span class="en">Soda</span></div>
+          <div class="highball-opt"><span class="zh">薑汁汽水</span><span class="en">Ginger Ale</span></div>
+          <div class="highball-opt"><span class="zh">柳橙汁</span><span class="en">OJ</span></div>
+          <div class="highball-opt"><span class="zh">蔓越莓汁</span><span class="en">Cranberry</span></div>
+          <div class="highball-opt"><span class="zh">鳳梨汁</span><span class="en">Pineapple</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="item-list">
+      <div class="item"><div class="item-info"><div class="item-name-zh">一加一 Highball</div></div><div class="item-price">300</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">柯夢波丹</div><div class="item-name-en">Cosmopolitan</div></div><div class="item-price">300</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">伏特加萊姆</div><div class="item-name-en">Vodka Lime</div></div><div class="item-price">300</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">戴克力</div><div class="item-name-en">Daiquiri</div><div class="item-note">香蕉 / 原味 / 鳳梨 Banana / Original / Pineapple</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">瑪格莉特</div><div class="item-name-en">Margarita</div><div class="item-note">香蕉 / 原味 / 鳳梨 / 草莓</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">墨西多</div><div class="item-name-en">Mojito</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">葡萄柚墨西多</div><div class="item-name-en">Grapefruit Mojito</div></div><div class="item-price">340</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">傑克雪碧君</div><div class="item-name-en">Mr. Jack Sprite</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">火雞淑女蔓蔓</div><div class="item-name-en">Lady Turkey</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">長島冰茶 Ⅰ</div><div class="item-name-en">Long Island Iced Tea I</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">長島冰茶 Ⅱ</div><div class="item-name-en">Long Island Iced Tea II</div></div><div class="item-price">340</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">長島冰茶 Ⅲ</div><div class="item-name-en">Long Island Iced Tea III</div></div><div class="item-price">360</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">長島冰茶 PLUS</div><div class="item-name-en">Long Island Iced Tea PLUS</div></div><div class="item-price">480</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">長島果茶</div><div class="item-name-en">Long Island Fruit Tea</div></div><div class="item-price">380</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">愛必死</div><div class="item-name-en">Absinth in Peace</div><div class="item-note">紅酒 Red Wine / 白酒 White Wine</div></div><div class="item-price">360</div></div>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="subsection-label" style="margin-top:16px;">SIGNATURE COCKTAILS</div>
+    <div class="item-list">
+      <div class="item"><div class="item-info"><div class="item-name-zh">紅寶石</div><div class="item-name-en">Ruby</div></div><div class="item-price">300</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">血鑽石</div><div class="item-name-en">Blood Diamond</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">紅心皇后</div><div class="item-name-en">Queen of Hearts</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">外木山野裸</div><div class="item-name-en">Sex on the Beach</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">拉拉山の柚惑</div><div class="item-name-en">Sex on the Bench</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">藍眼淚</div><div class="item-name-en">Blue Hawaiian</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">奇異世界</div><div class="item-name-en">Kiwi World</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">蘋果派</div><div class="item-name-en">Apple Pie</div></div><div class="item-price">340</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">鳳刺的琴蘇</div><div class="item-name-en">Pineapple Love</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">金包銀</div><div class="item-name-en">Life with No Money</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">雪中紅</div><div class="item-name-en">Red in Snow</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">杏仁酸酒</div><div class="item-name-en">Amaretto Sour</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">葡萄柚酸酒</div><div class="item-name-en">Grapefruit Sour</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">薑汁酸酒</div><div class="item-name-en">Ginger Sour</div></div><div class="item-price">340</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">福爾摩沙酸酒</div><div class="item-name-en">Formosa Sour</div></div><div class="item-price">320</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">島嶼果實</div><div class="item-name-en">Formosa Gains</div></div><div class="item-price">340</div></div>
+    </div>
+
+    <!-- SANGRIA / HOT -->
+    <div class="subsection-label" style="margin-top:16px;">SANGRIA & HOT COCKTAILS</div>
+    <div class="item-list">
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">桑格莉亞</div>
+          <div class="item-name-en">Sangria</div>
+          <div class="item-note">白酒 White / 紅酒 Red</div>
+        </div>
+        <div class="item-price"><small>I/320 H/320</small></div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">肉桂桑格莉亞</div>
+          <div class="item-name-en">Cinnamon Sangria</div>
+        </div>
+        <div class="item-price"><small>I/340 H/340</small></div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">夢幻仙境</div>
+          <div class="item-name-en">Fairyland</div>
+        </div>
+        <div class="item-price"><small>I/340 H/340</small></div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">熱熱喝快快好</div>
+          <div class="item-name-en">Prescription for Cold</div>
+        </div>
+        <div class="item-price"><small>H/320</small></div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">熱熱喝薑薑好</div>
+          <div class="item-name-en">Prescription for Cold (Ginger)</div>
+        </div>
+        <div class="item-price"><small>H/340</small></div>
+      </div>
+    </div>
+
+    <!-- BOMB -->
+    <div class="subsection-label" style="margin-top:16px;">BOMB 炸彈酒</div>
+    <div class="item-list">
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">深水炸彈 / 超級深水炸彈</div>
+          <div class="item-name-en">Depth Charge / Super Depth Charge</div>
+        </div>
+        <div class="item-price">300/340</div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">野格棒 / 野格超棒</div>
+          <div class="item-name-en">Jäger Bomb / Jäger Super Bomb</div>
+        </div>
+        <div class="item-price">300/340</div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">雪莉棒 / 雪莉超棒</div>
+          <div class="item-name-en">Sherry Bomb / Sherry Super Bomb</div>
+        </div>
+        <div class="item-price">300/340</div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">艾碧斯棒 / 艾碧斯超棒</div>
+          <div class="item-name-en">Absinth Bomb / Absinth Super Bomb</div>
+        </div>
+        <div class="item-price">300/340</div>
+      </div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">台灣棒 / 台灣超棒</div>
+          <div class="item-name-en">Kaoliang Bomb / Kaoliang Super Bomb</div>
+        </div>
+        <div class="item-price">300/340</div>
+      </div>
+    </div>
+
+    <!-- SHOT -->
+    <div class="subsection-label" style="margin-top:16px;">SHOT HAPPY HOUR</div>
+    <div class="item-list">
+      <div class="item"><div class="item-info"><div class="item-name-zh">龍舌蘭 Tequila</div></div><div class="item-price"><small>1/120 3/320 6/600</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">伏特加 Vodka</div></div><div class="item-price"><small>1/120 3/320 6/600</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">威士忌 Whisky</div></div><div class="item-price"><small>1/120 3/320 6/600</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">琴酒 Gin</div></div><div class="item-price"><small>1/120 3/320 6/600</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">台灣高粱 Kaoliang</div></div><div class="item-price"><small>1/120 3/320 6/600</small></div></div>
+      <div class="item">
+        <div class="item-info">
+          <div class="item-name-zh">艾碧斯有兩種 Absinth 2 Much</div>
+          <div class="item-name-en">艾碧斯 · 火焰艾碧斯 · 水蜜桃香甜酒 · 青蘋果香甜酒</div>
+        </div>
+        <div class="item-price">900</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ WINE ══════════ -->
+  <div class="section" id="wine">
+    <div class="section-header">
+      <div>
+        <div class="section-title">WINE</div>
+        <div class="section-title-zh">葡萄酒</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="wine-type-title white">WHITE 白酒</div>
+    <div class="wine-grid">
+      <div class="wine-card">
+        <div class="wine-brand">TRAPICHE</div>
+        <div class="wine-name">Astica</div>
+        <div class="wine-varietal">Chardonnay</div>
+        <div class="wine-origin">🇦🇷 Argentina</div>
+        <div class="wine-price">G/250 · B/980</div>
+      </div>
+      <div class="wine-card">
+        <div class="wine-brand">FELIX SOLIS</div>
+        <div class="wine-name">Contenda</div>
+        <div class="wine-varietal">Sauvignon Blanc</div>
+        <div class="wine-origin">🇪🇸 Spain</div>
+        <div class="wine-price">B/980</div>
+      </div>
+    </div>
+
+    <div class="wine-type-title red">RED 紅酒</div>
+    <div class="wine-grid">
+      <div class="wine-card">
+        <div class="wine-brand">TRAPICHE</div>
+        <div class="wine-name">Astica</div>
+        <div class="wine-varietal">Cabernet Sauvignon - Malbec</div>
+        <div class="wine-origin">🇦🇷 Argentina</div>
+        <div class="wine-price">G/250 · B/980</div>
+      </div>
+      <div class="wine-card">
+        <div class="wine-brand">KARKÚ</div>
+        <div class="wine-name">Nocturno</div>
+        <div class="wine-varietal">Merlot</div>
+        <div class="wine-origin">🇨🇱 Chile</div>
+        <div class="wine-price">B/980</div>
+      </div>
+    </div>
+    <div style="padding: 4px 16px 16px; font-size: 11px; color: var(--muted);">G = 175ml &nbsp;·&nbsp; B = 750ml</div>
+  </div>
+
+  <!-- ══════════ BEVERAGE ══════════ -->
+  <div class="section" id="beverage">
+    <div class="section-header">
+      <div>
+        <div class="section-title">BEVERAGE</div>
+        <div class="section-title-zh">飲料</div>
+      </div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="subsection-label">茶 · 奶 · 果汁</div>
+    <div class="item-list">
+      <div class="item"><div class="item-info"><div class="item-name-zh">錫蘭紅茶</div><div class="item-name-en">Ceylon Black Tea</div></div><div class="item-price"><small>I/140 H/140</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">好喝水茶</div><div class="item-name-en">Fruit Tea</div></div><div class="item-price"><small>I/180 H/180</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">好喝柚子茶</div><div class="item-name-en">Yuzu Tea</div></div><div class="item-price"><small>I/180 H/180</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">洋甘菊茶</div><div class="item-name-en">Chamomile Tea</div></div><div class="item-price"><small>H/160</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">伯爵茶</div><div class="item-name-en">Earl Grey Tea</div></div><div class="item-price"><small>H/160</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">黑糖奶茶</div><div class="item-name-en">Brown Sugar Milk Tea</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">巧克力牛奶</div><div class="item-name-en">Chocolate Milk</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">蜂蜜檸檬汁</div><div class="item-name-en">Honey Lemon Juice</div></div><div class="item-price">160</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">蜂蜜葡萄柚汁</div><div class="item-name-en">Honey Grapefruit Juice</div></div><div class="item-price">160</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">奇異果汁</div><div class="item-name-en">Kiwi Juice</div></div><div class="item-price">180</div></div>
+    </div>
+
+    <div class="subsection-label">思慕奇 Smoothie</div>
+    <div class="item-list">
+      <div class="item"><div class="item-info"><div class="item-name-zh">青蘋果思慕奇</div><div class="item-name-en">Green Apple Smoothie</div></div><div class="item-price">180</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">奇異果思慕奇</div><div class="item-name-en">Kiwi Smoothie</div></div><div class="item-price">180</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">草莓思慕奇</div><div class="item-name-en">Strawberry Smoothie</div></div><div class="item-price">180</div></div>
+    </div>
+
+    <div class="subsection-label">咖啡 Coffee</div>
+    <div class="item-list">
+      <div class="item"><div class="item-info"><div class="item-name-zh">美式咖啡</div><div class="item-name-en">Americano</div></div><div class="item-price"><small>I/140 H/140</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">原味拿鐵</div><div class="item-name-en">Caffe Latte</div></div><div class="item-price"><small>I/160 H/160</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">黑糖拿鐵</div><div class="item-name-en">Brown Sugar Caffe Latte</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">焦糖拿鐵</div><div class="item-name-en">Caramel Caffe Latte</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">巧克力摩卡</div><div class="item-name-en">Chocolate Mocha</div></div><div class="item-price"><small>I/170 H/170</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">貝禮詩拿鐵</div><div class="item-name-en">Baileys Caffe Latte</div></div><div class="item-price"><small>I/200 H/200</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">濃縮西西里</div><div class="item-name-en">Lemon Espresso</div></div><div class="item-price">140</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">氣泡西西里</div><div class="item-name-en">Coffee Lemonade</div></div><div class="item-price">160</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">葡萄柚西西里</div><div class="item-name-en">Grapefruit Coffee Lemonade</div></div><div class="item-price">170</div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">原味卡布奇諾</div><div class="item-name-en">Cappuccino</div></div><div class="item-price"><small>H/160</small></div></div>
+      <div class="item"><div class="item-info"><div class="item-name-zh">黑糖卡布奇諾</div><div class="item-name-en">Brown Sugar Cappuccino</div></div><div class="item-price"><small>H/170</small></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="logo-sm">SOL CAFE</div>
+  <div>All prices in NTD · 以上價格皆含稅</div>
+</div>
+
+<script>
+  function showSection(id, el) {
+    // hide all
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    // show target
+    document.getElementById(id).classList.add('active');
+    // activate tab
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      if (b.dataset.section === id) b.classList.add('active');
+    });
+    // scroll tab into view
+    const activeTab = document.querySelector(`.tab-btn[data-section="${id}"]`);
+    if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    // scroll to top
+    window.scrollTo({ top: document.querySelector('.tabs-wrapper').offsetTop - 72, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
